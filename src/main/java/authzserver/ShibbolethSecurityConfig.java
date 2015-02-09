@@ -13,6 +13,7 @@ public class ShibbolethSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    // TODO replace with shibboleth
     auth.inMemoryAuthentication().withUser("marissa").password("wombat").roles("USER").and().withUser("sam")
       .password("kangaroo").roles("USER");
   }
@@ -26,6 +27,8 @@ public class ShibbolethSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     // shibboleth stuff will be here
+    http.authorizeRequests()
+      .anyRequest().fullyAuthenticated();
   }
 
 }
