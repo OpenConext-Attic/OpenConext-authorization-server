@@ -10,5 +10,4 @@ public class AuthzServerApplication {
     SpringApplication.run(AuthzServerApplication.class, args);
   }
 
-
 }

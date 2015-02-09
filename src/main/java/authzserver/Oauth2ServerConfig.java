@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -29,17 +30,13 @@ public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
     return new JdbcTokenStore(dataSource);
   }
 
-
   @Override
   public void configure(AuthorizationServerEndpointsConfigurer endpoints)
     throws Exception {
-    // @formatter:off
     endpoints
       .tokenStore(tokenStore())
-      .authorizationCodeServices(new JdbcAuthorizationCodeServices(dataSource))
+      .authorizationCodeServices(new InMemoryAuthorizationCodeServices());
     // TODO add an implicit grant service?
-    ;
-    // @formatter:on
   }
 
 
