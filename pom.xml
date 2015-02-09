@@ -8,7 +8,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>demo</name>
+  <name>OpenConext oauth2 server</name>
   <description>OpenConext OAuth2 Authorization Server</description>
 
   <parent>
@@ -24,6 +24,8 @@
     <start-class>authzserver.AuthzServerApplication</start-class>
     <java.version>1.8</java.version>
     <spring-security-oauth2.version>2.0.6.RELEASE</spring-security-oauth2.version>
+    <flyway.version>3.1</flyway.version>
+    <mysql-jdbc-driver.version>5.1.34</mysql-jdbc-driver.version>
   </properties>
 
   <dependencies>
@@ -36,14 +38,19 @@
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.security.oauth</groupId>
       <artifactId>spring-security-oauth2</artifactId>
       <version>${spring-security-oauth2.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>${mysql-jdbc-driver.version}</version>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 
