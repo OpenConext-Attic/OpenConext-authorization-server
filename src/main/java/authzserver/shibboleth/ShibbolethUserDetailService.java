@@ -17,7 +17,6 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
     private final ShibbolethPrincipal principal;
 
     private ShibbolethUser(ShibbolethPrincipal principal) {
-
       this.principal = principal;
     }
 
