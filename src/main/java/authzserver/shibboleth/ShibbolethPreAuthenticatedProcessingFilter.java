@@ -1,6 +1,5 @@
 package authzserver.shibboleth;
 
-import java.util.Enumeration;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,16 +16,8 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     final Optional<String> uid = Optional.ofNullable(request.getHeader(ShibbolethRequestAttributes.UID.getAttributeName()));
     if (uid.isPresent()) {
       LOG.info("Found user with uid {}", uid.get());
-      final String displayName = request.getHeader(ShibbolethRequestAttributes.DISPLAY_NAME.getAttributeName());
-      return new ShibbolethPrincipal(uid.get(), displayName);
+      return uid.get();
     } else {
-      LOG.info("No principal found. This should have been set by shibboleth!");
-      Enumeration<String> headerNames = request.getHeaderNames();
-      while (headerNames.hasMoreElements()) {
-        String name = headerNames.nextElement();
-        LOG.info("Header name {} has value {}", name, request.getHeader(name));
-      }
-
       return null;
     }
   }

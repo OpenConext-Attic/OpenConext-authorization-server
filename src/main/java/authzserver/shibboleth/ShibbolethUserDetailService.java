@@ -14,14 +14,11 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 public class ShibbolethUserDetailService implements AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
 
   public static class ShibbolethUser implements UserDetails {
-    private final ShibbolethPrincipal principal;
 
-    private ShibbolethUser(ShibbolethPrincipal principal) {
-      this.principal = principal;
-    }
+    private final String uid;
 
-    public static ShibbolethUser fromPrincipal(ShibbolethPrincipal principal) {
-      return new ShibbolethUser(principal);
+    public ShibbolethUser(String uid) {
+      this.uid = uid;
     }
 
     @Override
@@ -36,7 +33,7 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
 
     @Override
     public String getUsername() {
-      return this.principal.getDisplayName();
+      return this.uid;
     }
 
     @Override
@@ -62,7 +59,7 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
 
   @Override
   public UserDetails loadUserDetails(PreAuthenticatedAuthenticationToken authentication) throws UsernameNotFoundException {
-    ShibbolethPrincipal shibbolethPrincipal = (ShibbolethPrincipal) authentication.getPrincipal();
-    return ShibbolethUser.fromPrincipal(shibbolethPrincipal);
+    String uid = (String) authentication.getPrincipal();
+    return new ShibbolethUser(uid);
   }
 }
