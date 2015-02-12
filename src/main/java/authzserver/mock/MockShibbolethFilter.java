@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.GenericFilterBean;
 
-import authzserver.shibboleth.ShibbolethRequestAttributes;
+import authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter;
 
 public class MockShibbolethFilter extends GenericFilterBean {
 
@@ -60,7 +60,7 @@ public class MockShibbolethFilter extends GenericFilterBean {
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
     SetHeader wrapper = new SetHeader((HttpServletRequest) servletRequest);
-    wrapper.setHeader(ShibbolethRequestAttributes.UID.getAttributeName(), "saml2_user");
+    wrapper.setHeader(ShibbolethPreAuthenticatedProcessingFilter.UID_ATTRIBUTE_NAME, "saml2_user");
     filterChain.doFilter(wrapper, servletResponse);
   }
 }

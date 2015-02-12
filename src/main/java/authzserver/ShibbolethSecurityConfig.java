@@ -2,7 +2,6 @@ package authzserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +29,7 @@ public class ShibbolethSecurityConfig extends WebSecurityConfigurerAdapter {
   public FilterRegistrationBean mockShibbolethFilter() {
     FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
     filterRegistrationBean.setFilter(new MockShibbolethFilter());
-    filterRegistrationBean.addUrlPatterns("/*");
+    filterRegistrationBean.addUrlPatterns("/oauth/authorize");
     return filterRegistrationBean;
   }
 
@@ -43,14 +42,11 @@ public class ShibbolethSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    LOG.info("Configuring application security using {}", authenticationManagerBean().getClass());
-    ShibbolethPreAuthenticatedProcessingFilter filter = new ShibbolethPreAuthenticatedProcessingFilter();
-    filter.setAuthenticationManager(authenticationManagerBean());
-    http.addFilterBefore(filter, AbstractPreAuthenticatedProcessingFilter.class);
-    http
+    http.
+      addFilterBefore(new ShibbolethPreAuthenticatedProcessingFilter(authenticationManagerBean()),
+        AbstractPreAuthenticatedProcessingFilter.class)
       .authorizeRequests()
-      .antMatchers("/oauth/").hasAnyRole("USER");
-    http.csrf();
+      .antMatchers("/oauth/authorize").hasAnyRole("USER");
   }
 
   @Override
