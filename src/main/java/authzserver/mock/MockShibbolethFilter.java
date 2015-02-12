@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -16,10 +14,19 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.filter.GenericFilterBean;
 
 import authzserver.shibboleth.ShibbolethRequestAttributes;
 
-public class MockShibbolethFilter implements Filter {
+public class MockShibbolethFilter extends GenericFilterBean {
+
+  private static final Logger LOG = LoggerFactory.getLogger(MockShibbolethFilter.class);
+
+  public MockShibbolethFilter() {
+    LOG.info("====================================");
+    LOG.info("MockShibbolethFilter initializing...");
+    LOG.info("====================================");
+  }
 
   private static class SetHeader extends HttpServletRequestWrapper {
 
@@ -50,26 +57,10 @@ public class MockShibbolethFilter implements Filter {
     }
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(MockShibbolethFilter.class);
-
-  @Override
-  public void init(FilterConfig filterConfig) throws ServletException {
-    LOG.info("=================================");
-    LOG.info("MockShibbolethFilter initialized!");
-    LOG.info("=================================");
-  }
-
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
     SetHeader wrapper = new SetHeader((HttpServletRequest) servletRequest);
     wrapper.setHeader(ShibbolethRequestAttributes.UID.getAttributeName(), "saml2_user");
-    wrapper.setHeader(ShibbolethRequestAttributes.DISPLAY_NAME.getAttributeName(), "SAML2 Auth. User");
-    LOG.info("ShibbolethRequestAttributes set on servletRequest!");
     filterChain.doFilter(wrapper, servletResponse);
-  }
-
-  @Override
-  public void destroy() {
-
   }
 }
