@@ -8,9 +8,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -51,5 +53,11 @@ public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
     tokenServices.setSupportRefreshToken(true);
     tokenServices.setTokenStore(tokenStore());
     return tokenServices;
+  }
+
+  @Override
+  public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
+    oauthServer.tokenKeyAccess("hasAuthority('ROLE_TRUSTED_CLIENT')")
+      .checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')");
   }
 }
