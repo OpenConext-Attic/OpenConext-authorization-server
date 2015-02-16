@@ -40,7 +40,10 @@ public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
     // TODO add an implicit grant service?
   }
 
-
+  @Override
+  public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
+    oauthServer.checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')");
+  }
   @Override
   public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
     clients.jdbc(dataSource);
@@ -55,9 +58,4 @@ public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
     return tokenServices;
   }
 
-  @Override
-  public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
-    oauthServer.tokenKeyAccess("hasAuthority('ROLE_TRUSTED_CLIENT')")
-      .checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')");
-  }
 }
