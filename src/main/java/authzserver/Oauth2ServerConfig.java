@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
@@ -21,6 +20,8 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 @Configuration
 @EnableAuthorizationServer
 public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
+
+  private static final String ROLE_TOKEN_CHECKER = "ROLE_TOKEN_CHECKER";
 
   @Autowired
   private DataSource dataSource;
@@ -42,11 +43,12 @@ public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
 
   @Override
   public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
-    oauthServer.checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')");
+    oauthServer.checkTokenAccess("hasAuthority('" + ROLE_TOKEN_CHECKER + "')");
   }
+
   @Override
-  public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-    clients.jdbc(dataSource);
+  public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
+    configurer.jdbc(dataSource);
   }
 
   @Bean
@@ -57,5 +59,4 @@ public class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
     tokenServices.setTokenStore(tokenStore());
     return tokenServices;
   }
-
 }
