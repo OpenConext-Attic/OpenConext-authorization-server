@@ -1,7 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:mysql://localhost/oauth2_server_db
-    username: oauth2_server
-    password: oauth2_server
-    driverClassName: com.mysql.jdbc.Driver
-
