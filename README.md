@@ -36,7 +36,8 @@ Resource servers need to be able to check authentication tokens for validity wit
 For resource servers to be able to do so, they need to be registered as a client. This is done by
 
 ```sql
-INSERT INTO oauth_client_details (client_id, client_secret, authorities) values ('vootservice', 'secret','ROLE_TOKEN_CHECKER');
+INSERT INTO oauth_client_details (client_id, client_secret, authorities)
+VALUES ('vootservice', 'secret','ROLE_TOKEN_CHECKER');
 ```
 
 Here, 'vootservice' is the username that the resource server presents in the basic authentication header it adds to each `/oauth/check_token` request.
