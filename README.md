@@ -1,6 +1,15 @@
 # OpenConext-oauth2-server
 Oauth2 server for the OpenConext platform.
 
+# Create database
+
+    mysql -uroot
+    CREATE DATABASE oauth2_server_db DEFAULT CHARACTER SET latin1;
+    create user 'oauth2_server'@'localhost' identified by 'oauth2_server';
+    grant all on oauth2_server_db.* to 'oauth2_server'@'localhost';
+
+# Start the app
+
 To run locally:
 
 `mvn spring-boot:run -Drun.jvmArguments="-Dspring.profiles.active=dev"`
