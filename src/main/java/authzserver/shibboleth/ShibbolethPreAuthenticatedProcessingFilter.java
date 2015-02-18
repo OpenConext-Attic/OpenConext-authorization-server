@@ -10,7 +10,7 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 
 public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-  public static final String UID_ATTRIBUTE_NAME = "shib_uid";
+  public static final String UID_ATTRIBUTE_NAME = "uid";
 
   private static final Logger LOG = LoggerFactory.getLogger(ShibbolethPreAuthenticatedProcessingFilter.class);
 
