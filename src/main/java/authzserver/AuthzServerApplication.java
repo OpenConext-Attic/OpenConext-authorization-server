@@ -57,7 +57,7 @@ public class AuthzServerApplication {
 
     @Override
     public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
-      configurer.jdbc(dataSource).withClient("vootservice").secret("secret").authorities(ROLE_TOKEN_CHECKER);
+      configurer.jdbc(dataSource);
     }
 
     @Bean
