@@ -3,17 +3,17 @@ package authzserver;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
+import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -35,19 +35,43 @@ public class AuthzServerApplication {
     @Autowired
     private DataSource dataSource;
 
-    @Bean
-    @Scope("singleton")
-    TokenStore tokenStore() {
-      return new JdbcTokenStore(dataSource);
-    }
+    @Value("${oauthServer.accessTokenValiditySeconds}")
+    private Integer accessTokenValiditySeconds;
+
+    @Value("${oauthServer.refreshTokenValiditySeconds}")
+    private Integer refreshTokenValiditySeconds;
+
+    @Value("${oauthServer.approvalExpirySeconds}")
+    private Integer approvalExpirySeconds;
+
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
       throws Exception {
+
+      final TokenStore tokenStore = new JdbcTokenStore(dataSource);
+      final JdbcApprovalStore approvalStore = new JdbcApprovalStore(dataSource);
+
+      final ApprovalStoreUserApprovalHandler userApprovalHandler = new ApprovalStoreUserApprovalHandler();
+      userApprovalHandler.setApprovalStore(approvalStore);
+      userApprovalHandler.setApprovalExpiryInSeconds(approvalExpirySeconds);
+
+      final DefaultTokenServices tokenServices = new DefaultTokenServices();
+      tokenServices.setSupportRefreshToken(true);
+      tokenServices.setTokenStore(tokenStore);
+      tokenServices.setAccessTokenValiditySeconds(accessTokenValiditySeconds);
+      tokenServices.setRefreshTokenValiditySeconds(refreshTokenValiditySeconds);
+
       endpoints
-        .tokenStore(tokenStore())
+        .tokenServices(tokenServices)
+        .tokenStore(tokenStore)
+        .approvalStore(approvalStore)
+        .userApprovalHandler(userApprovalHandler)
         .authorizationCodeServices(new InMemoryAuthorizationCodeServices());
     }
+
+
+
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
@@ -59,13 +83,6 @@ public class AuthzServerApplication {
       configurer.jdbc(dataSource);
     }
 
-    @Bean
-    @Primary
-    public DefaultTokenServices tokenServices() {
-      DefaultTokenServices tokenServices = new DefaultTokenServices();
-      tokenServices.setSupportRefreshToken(true);
-      tokenServices.setTokenStore(tokenStore());
-      return tokenServices;
-    }
+
   }
 }
