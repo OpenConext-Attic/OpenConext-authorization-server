@@ -27,8 +27,8 @@ For clients to be able to connect, they must be known to this oAuth server. To r
 with this server, execute the following SQL on the server's schema:
 
 ```sql
-INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope)
-VALUES ('cool_app_id', 'groups', 'secret', 'read');
+INSERT INTO oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types)
+VALUES ('cool_app_id', 'groups', 'secret', 'read','implicit,authorization_code,refresh_token');
 ```
 
 # Adding resource servers

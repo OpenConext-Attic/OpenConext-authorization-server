@@ -47,7 +47,6 @@ public class AuthzServerApplication {
       endpoints
         .tokenStore(tokenStore())
         .authorizationCodeServices(new InMemoryAuthorizationCodeServices());
-      // TODO add an implicit grant service?
     }
 
     @Override
