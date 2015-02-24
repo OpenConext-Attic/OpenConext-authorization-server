@@ -11,14 +11,41 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
+import authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.ShibbolethPrincipal;
+
 public class ShibbolethUserDetailService implements AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
 
   public static class ShibbolethUser implements UserDetails {
 
     private final String uid;
+    private final String schacHomeOrganization;
+    private final String displayName;
 
-    public ShibbolethUser(String uid) {
+    @Override
+    public String toString() {
+      return "ShibbolethUser{" +
+        "uid='" + uid + '\'' +
+        ", schacHomeOrganization='" + schacHomeOrganization + '\'' +
+        ", displayName='" + displayName + '\'' +
+        '}';
+    }
+
+    public ShibbolethUser(String uid, String schacHomeOrganization, String displayName) {
       this.uid = uid;
+      this.schacHomeOrganization = schacHomeOrganization;
+      this.displayName = displayName;
+    }
+
+    public String getUid() {
+      return uid;
+    }
+
+    public String getSchacHomeOrganization() {
+      return schacHomeOrganization;
+    }
+
+    public String getDisplayName() {
+      return displayName;
     }
 
     @Override
@@ -59,7 +86,7 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
 
   @Override
   public UserDetails loadUserDetails(final PreAuthenticatedAuthenticationToken authentication) throws UsernameNotFoundException {
-    String uid = (String) authentication.getPrincipal();
-    return new ShibbolethUser(uid);
+    ShibbolethPrincipal shibbolethPrincipal = (ShibbolethPrincipal) authentication.getPrincipal();
+    return new ShibbolethUser(shibbolethPrincipal.uid, shibbolethPrincipal.schacHomeOrganization, shibbolethPrincipal.displayName);
   }
 }
