@@ -19,8 +19,8 @@ import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserAp
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
 @SpringBootApplication
@@ -42,11 +42,22 @@ public class AuthzServerApplication {
     @Autowired
     private ApprovalStore approvalStore;
 
+    @Value("${oauthServer.accessTokenValiditySeconds}")
+    private Integer accessTokenValiditySeconds;
+
+    @Value("${oauthServer.refreshTokenValiditySeconds}")
+    private Integer refreshTokenValiditySeconds;
+
+    @Autowired
+    private JdbcTokenStore tokenStore;
+
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
       throws Exception {
       endpoints
         .approvalStore(approvalStore)
+        .accessTokenConverter(new DefaultAccessTokenConverter())
+        .tokenServices(tokenServices())
         .authorizationCodeServices(new InMemoryAuthorizationCodeServices());
     }
 
@@ -70,15 +81,11 @@ public class AuthzServerApplication {
     }
 
     @Bean
-    public TokenStore tokenStore() {
+    public JdbcTokenStore tokenStore() {
       return new JdbcTokenStore(dataSource);
     }
 
-    @Bean
-    @Autowired
-    public DefaultTokenServices tokenServices(@Value("${oauthServer.accessTokenValiditySeconds}") Integer accessTokenValiditySeconds,
-                                              @Value("${oauthServer.refreshTokenValiditySeconds}") Integer refreshTokenValiditySeconds,
-                                              TokenStore tokenStore) {
+    private DefaultTokenServices tokenServices() {
       final DefaultTokenServices tokenServices = new DefaultTokenServices();
       tokenServices.setSupportRefreshToken(true);
       tokenServices.setTokenStore(tokenStore);
