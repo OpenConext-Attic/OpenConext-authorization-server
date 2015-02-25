@@ -1,6 +1,5 @@
 package authzserver.shibboleth;
 
-import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -51,7 +50,8 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     return "N/A";
   }
 
-  public final static class ShibbolethPrincipal implements Serializable {
+  public final static class ShibbolethPrincipal {
+
     public final String uid;
     public final String schacHomeOrganization;
     public final String displayName;

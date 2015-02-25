@@ -15,7 +15,14 @@ import authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.Shibbol
 
 public class ShibbolethUserDetailService implements AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
 
+  /**
+   * Instances of this class gets serialized and stored in the database by spring-security-oauth (the authentication column)
+   * Therefore, when you change this class, you should be aware that pre-existing tokens must be deleted, unless you implement
+   * some form of automatic migration.
+   */
   public static class ShibbolethUser implements UserDetails {
+
+    private static final long serialVersionUID = 1l;
 
     private final String uid;
     private final String schacHomeOrganization;
