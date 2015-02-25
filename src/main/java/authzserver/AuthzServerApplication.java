@@ -51,12 +51,18 @@ public class AuthzServerApplication {
     @Autowired
     private JdbcTokenStore tokenStore;
 
+
+
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
       throws Exception {
+
+      final DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+      accessTokenConverter.setUserTokenConverter(new SchacHomeAwareUserAuthenticationConverter());
+
       endpoints
         .approvalStore(approvalStore)
-        .accessTokenConverter(new DefaultAccessTokenConverter())
+        .accessTokenConverter(accessTokenConverter)
         .tokenServices(tokenServices())
         .authorizationCodeServices(new InMemoryAuthorizationCodeServices());
     }
