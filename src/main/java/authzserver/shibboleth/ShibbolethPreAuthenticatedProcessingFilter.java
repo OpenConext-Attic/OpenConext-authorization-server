@@ -1,7 +1,6 @@
 package authzserver.shibboleth;
 
 import java.io.Serializable;
-import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
