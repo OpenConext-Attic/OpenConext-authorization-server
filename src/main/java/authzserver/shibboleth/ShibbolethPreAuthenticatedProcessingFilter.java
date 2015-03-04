@@ -1,5 +1,6 @@
 package authzserver.shibboleth;
 
+import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -12,7 +13,7 @@ import com.google.common.base.Strings;
 
 public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-  public static final String UID_HEADER_NAME = "uid";
+  public static final String UID_ID_HEADER_NAME = "fully-qualified-uid";
   public static final String SCHACH_HOME_ORGANIZATION_HEADER_NAME = "schachomeorganization";
   public static final String DISPLAY_NAME_HEADER_NAME = "displayname";
 
@@ -31,8 +32,15 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
    */
   @Override
   protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
-    String uid = request.getHeader(UID_HEADER_NAME);
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(uid), EMPTY_HEADER_ERROR_TEMPLATE, UID_HEADER_NAME);
+
+    final Enumeration<String> headerNames = request.getHeaderNames();
+    while(headerNames.hasMoreElements()){
+      String headerName = headerNames.nextElement();
+      LOG.debug("Header: {}, Value: {}", headerName, request.getHeader(headerName));
+    }
+
+    String uid = request.getHeader(UID_ID_HEADER_NAME);
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(uid), EMPTY_HEADER_ERROR_TEMPLATE, UID_ID_HEADER_NAME);
 
     String schacHomeOrganization = request.getHeader(SCHACH_HOME_ORGANIZATION_HEADER_NAME);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(schacHomeOrganization), EMPTY_HEADER_ERROR_TEMPLATE, SCHACH_HOME_ORGANIZATION_HEADER_NAME);
@@ -52,12 +60,12 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
 
   public final static class ShibbolethPrincipal {
 
-    public final String uid;
+    public final String username;
     public final String schacHomeOrganization;
     public final String displayName;
 
-    public ShibbolethPrincipal(String uid, String schacHomeOrganization, String displayName) {
-      this.uid = uid;
+    public ShibbolethPrincipal(String username, String schacHomeOrganization, String displayName) {
+      this.username = username;
       this.schacHomeOrganization = schacHomeOrganization;
       this.displayName = displayName;
     }
@@ -65,7 +73,7 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     @Override
     public String toString() {
       return "ShibbolethPrincipal{" +
-        "uid='" + uid + '\'' +
+        "username='" + username + '\'' +
         ", schacHomeOrganization='" + schacHomeOrganization + '\'' +
         ", displayName='" + displayName + '\'' +
         '}';

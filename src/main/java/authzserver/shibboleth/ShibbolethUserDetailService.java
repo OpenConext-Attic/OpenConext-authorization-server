@@ -22,29 +22,25 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
    */
   public static class ShibbolethUser implements UserDetails {
 
-    private static final long serialVersionUID = 1l;
+    private static final long serialVersionUID = 2l;
 
-    private final String uid;
+    private final String username;
     private final String schacHomeOrganization;
     private final String displayName;
 
     @Override
     public String toString() {
       return "ShibbolethUser{" +
-        "uid='" + uid + '\'' +
+        "username='" + username + '\'' +
         ", schacHomeOrganization='" + schacHomeOrganization + '\'' +
         ", displayName='" + displayName + '\'' +
         '}';
     }
 
-    public ShibbolethUser(String uid, String schacHomeOrganization, String displayName) {
-      this.uid = uid;
+    public ShibbolethUser(String username, String schacHomeOrganization, String displayName) {
+      this.username = username;
       this.schacHomeOrganization = schacHomeOrganization;
       this.displayName = displayName;
-    }
-
-    public String getUid() {
-      return uid;
     }
 
     public String getSchacHomeOrganization() {
@@ -67,7 +63,7 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
 
     @Override
     public String getUsername() {
-      return this.uid;
+      return this.username;
     }
 
     @Override
@@ -94,6 +90,6 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
   @Override
   public UserDetails loadUserDetails(final PreAuthenticatedAuthenticationToken authentication) throws UsernameNotFoundException {
     ShibbolethPrincipal shibbolethPrincipal = (ShibbolethPrincipal) authentication.getPrincipal();
-    return new ShibbolethUser(shibbolethPrincipal.uid, shibbolethPrincipal.schacHomeOrganization, shibbolethPrincipal.displayName);
+    return new ShibbolethUser(shibbolethPrincipal.username, shibbolethPrincipal.schacHomeOrganization, shibbolethPrincipal.displayName);
   }
 }
