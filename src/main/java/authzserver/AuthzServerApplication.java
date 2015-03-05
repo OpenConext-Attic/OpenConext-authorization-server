@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
-import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
@@ -51,8 +51,6 @@ public class AuthzServerApplication {
     @Autowired
     private JdbcTokenStore tokenStore;
 
-
-
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
       throws Exception {
@@ -64,7 +62,7 @@ public class AuthzServerApplication {
         .approvalStore(approvalStore)
         .accessTokenConverter(accessTokenConverter)
         .tokenServices(tokenServices())
-        .authorizationCodeServices(new InMemoryAuthorizationCodeServices());
+        .authorizationCodeServices(new JdbcAuthorizationCodeServices(this.dataSource));
     }
 
     @Bean
@@ -100,7 +98,6 @@ public class AuthzServerApplication {
       return tokenServices;
     }
 
-
     @Override
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
       oauthServer.checkTokenAccess("hasAuthority('" + ROLE_TOKEN_CHECKER + "')");
@@ -110,7 +107,6 @@ public class AuthzServerApplication {
     public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
       configurer.jdbc(dataSource);
     }
-
 
   }
 }
