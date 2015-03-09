@@ -1,6 +1,5 @@
 package authzserver.shibboleth;
 
-import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -13,7 +12,7 @@ import com.google.common.base.Strings;
 
 public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-  public static final String UID_ID_HEADER_NAME = "fully-qualified-uid";
+  public static final String COLLAB_PERSON_ID_HEADER_NAME = "name-id";
   public static final String SCHACH_HOME_ORGANIZATION_HEADER_NAME = "schachomeorganization";
   public static final String DISPLAY_NAME_HEADER_NAME = "displayname";
 
@@ -32,8 +31,8 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
    */
   @Override
   protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
-    String uid = request.getHeader(UID_ID_HEADER_NAME);
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(uid), EMPTY_HEADER_ERROR_TEMPLATE, UID_ID_HEADER_NAME);
+    String uid = request.getHeader(COLLAB_PERSON_ID_HEADER_NAME);
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(uid), EMPTY_HEADER_ERROR_TEMPLATE, COLLAB_PERSON_ID_HEADER_NAME);
 
     String schacHomeOrganization = request.getHeader(SCHACH_HOME_ORGANIZATION_HEADER_NAME);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(schacHomeOrganization), EMPTY_HEADER_ERROR_TEMPLATE, SCHACH_HOME_ORGANIZATION_HEADER_NAME);
