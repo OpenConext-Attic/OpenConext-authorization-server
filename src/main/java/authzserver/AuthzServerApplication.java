@@ -8,7 +8,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -18,11 +20,13 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @SpringBootApplication
 public class AuthzServerApplication {
@@ -31,12 +35,12 @@ public class AuthzServerApplication {
     SpringApplication.run(AuthzServerApplication.class, args);
   }
 
+  public static final String ROLE_TOKEN_CHECKER = "ROLE_TOKEN_CHECKER";
+
 
   @Configuration
   @EnableAuthorizationServer
   protected static class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
-
-    private static final String ROLE_TOKEN_CHECKER = "ROLE_TOKEN_CHECKER";
 
     @Autowired
     private DataSource dataSource;
@@ -52,6 +56,12 @@ public class AuthzServerApplication {
 
     @Autowired
     private JdbcTokenStore tokenStore;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
@@ -104,7 +114,12 @@ public class AuthzServerApplication {
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
       oauthServer
         .checkTokenAccess("hasAuthority('" + ROLE_TOKEN_CHECKER + "')")
-        .passwordEncoder(new BCryptPasswordEncoder());
+        .passwordEncoder(passwordEncoder());
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+      return new BCryptPasswordEncoder();
     }
 
     @Override
@@ -112,5 +127,15 @@ public class AuthzServerApplication {
       configurer.jdbc(dataSource);
     }
 
+    @Bean
+    @Autowired
+    public ClientsAndResourcesInitializer clientsAndResourcesInitializer(
+      @Value("${defaultClientsAndResourceServers.config.path}") final String configFileLocation,
+      PlatformTransactionManager transactionManager) {
+
+      final JdbcClientDetailsService jdbcClientDetailsService = new JdbcClientDetailsService(this.dataSource);
+      jdbcClientDetailsService.setPasswordEncoder(this.passwordEncoder);
+      return new ClientsAndResourcesInitializer(jdbcClientDetailsService, resourceLoader.getResource(configFileLocation), transactionManager);
+    }
   }
 }

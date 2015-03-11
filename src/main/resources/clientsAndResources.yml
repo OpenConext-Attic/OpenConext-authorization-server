@@ -1,0 +1,29 @@
+---
+clients:
+  - clientId: cool_app_id
+    secret: "secret"
+    resourceIds:
+      - groups
+    scopes:
+      - groups
+      - displayName
+    grantTypes:
+      - authorization_code
+    redirectUri: http://localhost:8081/
+
+  - clientId: authz-admin
+    secret: "secret"
+    resourceIds:
+      - groups
+    scopes:
+      - groups
+      - displayName
+    grantTypes:
+      - authorization_code
+      - implicit
+    redirectUri: http://authz-playground-local:8089/redirect
+# The entries in the list below will all be granted the authority ROLE_TOKEN_CHECKER so they can invoke the /oauth/check_token endpoint
+resourceServers:
+- clientId: vootservice
+  secret: "secret"
+
