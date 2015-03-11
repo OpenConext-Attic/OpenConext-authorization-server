@@ -31,6 +31,7 @@ public class AuthzServerApplication {
     SpringApplication.run(AuthzServerApplication.class, args);
   }
 
+
   @Configuration
   @EnableAuthorizationServer
   protected static class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -55,11 +56,11 @@ public class AuthzServerApplication {
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
       throws Exception {
-
       final DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
       accessTokenConverter.setUserTokenConverter(new SchacHomeAwareUserAuthenticationConverter());
 
       endpoints
+        .pathMapping("/oauth/confirm_access", "/oauth/confirm")
         .approvalStore(approvalStore)
         .accessTokenConverter(accessTokenConverter)
         .tokenServices(tokenServices())
@@ -101,7 +102,6 @@ public class AuthzServerApplication {
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
-
       oauthServer
         .checkTokenAccess("hasAuthority('" + ROLE_TOKEN_CHECKER + "')")
         .passwordEncoder(new BCryptPasswordEncoder());

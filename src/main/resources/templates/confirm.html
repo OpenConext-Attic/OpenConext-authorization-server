@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{confirm.page.title(${appName}, ${authorizationRequest.clientId})}">Confirm</title>
+    <meta charset='utf-8'/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
+    <link th:href="@{/css/main.css}" media="screen" rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+<body>
+<div class="container">
+    <header class="page-header myHeader">
+        <img th:src="${logoUrl}" th:alt="${appName}"/>
+        <h1 th:text="${appName}"></h1>
+    </header>
+</div>
+<div class="container main">
+
+
+    <h1 th:text="#{confirm.page.greeting(${displayName})}"></h1>
+
+    <form id="confirmationForm" name="confirmationForm" class="form-horizontal" action='/oauth/authorize' method='post'>
+        <input name="user_oauth_approval" value="true" type="hidden"/>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="alert alert-info" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span th:text="#{confirm.page.alert(${authorizationRequest.clientId})}"></span>
+        </div>
+
+        <p th:text="#{confirm.page.formHeader(${authorizationRequest.clientId})}"></p>
+
+        <div class="form-group" th:each="scope: ${scopes}">
+            <label class="col-sm-2 control-label" th:text="#{${scope.key}+.description} + ${':'}"></label>
+
+            <input type="radio" th:name="${scope.key}" value="true" checked="checked"/><label class="allowDeny" th:text="#{confirm.page.allow}"/>
+            <input type="radio" th:name="${scope.key}" value="false"/><label class="allowDeny" th:text="#{confirm.page.deny}"/>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button name="authorize" class="btn btn-primary" type="submit" th:text="#{confirm.page.submit}"></button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
