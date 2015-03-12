@@ -8,7 +8,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -20,14 +19,11 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.approval.ApprovalStore;
 import org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler;
 import org.springframework.security.oauth2.provider.approval.JdbcApprovalStore;
-import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootApplication
 public class AuthzServerApplication {
@@ -37,12 +33,6 @@ public class AuthzServerApplication {
   }
 
   public static final String ROLE_TOKEN_CHECKER = "ROLE_TOKEN_CHECKER";
-
-  @Bean
-  @Autowired
-  public TransactionTemplate transactionTemplate(PlatformTransactionManager platformTransactionManager) {
-    return new TransactionTemplate(platformTransactionManager);
-  }
 
   @Configuration
   @EnableAuthorizationServer
@@ -65,12 +55,6 @@ public class AuthzServerApplication {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private ResourceLoader resourceLoader;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
@@ -123,9 +107,8 @@ public class AuthzServerApplication {
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
       oauthServer
         .checkTokenAccess("hasAuthority('" + ROLE_TOKEN_CHECKER + "')")
-        .passwordEncoder(passwordEncoder());
+        .passwordEncoder(passwordEncoder);
     }
-
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -135,17 +118,6 @@ public class AuthzServerApplication {
     @Override
     public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
       configurer.jdbc(dataSource);
-    }
-
-    @Bean
-    @Autowired
-    public ClientsAndResourcesInitializer clientsAndResourcesInitializer(
-      @Value("${defaultClientsAndResourceServers.config.path}") final String configFileLocation,
-      TransactionTemplate transactionTemplate) {
-
-      final JdbcClientDetailsService jdbcClientDetailsService = new JdbcClientDetailsService(this.dataSource);
-      jdbcClientDetailsService.setPasswordEncoder(this.passwordEncoder);
-      return new ClientsAndResourcesInitializer(jdbcClientDetailsService, resourceLoader.getResource(configFileLocation), transactionTemplate);
     }
   }
 }
