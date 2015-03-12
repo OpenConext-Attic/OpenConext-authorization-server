@@ -2,6 +2,7 @@ package authzserver;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientRegistrationService;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -32,12 +32,12 @@ public class ClientsAndResourcesInitializer implements ApplicationListener<Conte
 
   private final ClientRegistrationService clientRegistrationService;
   private final Resource resource;
-  private final PlatformTransactionManager transactionManager;
+  private final TransactionTemplate transactionTemplate;
 
-  public ClientsAndResourcesInitializer(ClientRegistrationService clientRegistrationService, Resource resource, PlatformTransactionManager transactionManager) {
+  public ClientsAndResourcesInitializer(ClientRegistrationService clientRegistrationService, Resource resource, TransactionTemplate transactionTemplate) {
     this.clientRegistrationService = clientRegistrationService;
     this.resource = resource;
-    this.transactionManager = transactionManager;
+    this.transactionTemplate = transactionTemplate;
   }
 
   @Override
@@ -49,73 +49,72 @@ public class ClientsAndResourcesInitializer implements ApplicationListener<Conte
       final List<? extends ConfigObject> clients = config.getObjectList("clients");
       final List<? extends ConfigObject> resourceServers = config.getObjectList("resourceServers");
 
-      new TransactionTemplate(transactionManager).execute((TransactionStatus transactionStatus) -> {
+      final List<ClientDetails> resourceServersAndClientsToPersist = new ArrayList<>();
+      final List<ClientDetails> preExisting = clientRegistrationService.listClientDetails();
 
-          List<ClientDetails> preExisting = clientRegistrationService.listClientDetails();
-          clients.forEach(clientConfigObj -> {
-            final Map<String, Object> clientConfig = clientConfigObj.unwrapped();
-            final String clientId = (String) clientConfig.get("clientId");
+      clients.forEach(clientConfigObj -> {
+        final Map<String, Object> clientConfig = clientConfigObj.unwrapped();
+        final String clientId = (String) clientConfig.get("clientId");
 
-            final Optional<ClientDetails> preExistingClientDetails =
-              preExisting.stream()
-                .filter(preExistingClient -> preExistingClient.getClientId().equals(clientId))
-                .findFirst();
+        final Optional<ClientDetails> preExistingClientDetails = findPreExistingClientDetails(clientId, preExisting);
+        BaseClientDetails clientDetails = preExistingClientDetails.isPresent() ? (BaseClientDetails) preExistingClientDetails.get() : new BaseClientDetails(clientId, null, null, null, null);
 
-            BaseClientDetails clientDetails = preExistingClientDetails.isPresent() ? (BaseClientDetails) preExistingClientDetails.get() : new BaseClientDetails(clientId, null, null, null, null);
+        final String secret = (String) clientConfig.get("secret");
+        clientDetails.setClientSecret(secret);
 
-            final String secret = (String) clientConfig.get("secret");
-            clientDetails.setClientSecret(secret);
+        List<String> resourceIds = (List<String>) clientConfig.get("resourceIds");
+        clientDetails.setResourceIds(resourceIds);
 
-            List<String> resourceIds = (List<String>) clientConfig.get("resourceIds");
-            clientDetails.setResourceIds(resourceIds);
+        final List<String> scopes = (List<String>) clientConfig.get("scopes");
+        clientDetails.setScope(scopes);
 
-            final List<String> scopes = (List<String>) clientConfig.get("scopes");
-            clientDetails.setScope(scopes);
+        final List<String> grantTypes = (List<String>) clientConfig.get("grantTypes");
+        clientDetails.setAuthorizedGrantTypes(grantTypes);
 
-            final List<String> grantTypes = (List<String>) clientConfig.get("grantTypes");
-            clientDetails.setAuthorizedGrantTypes(grantTypes);
+        final String redirectUri = (String) clientConfig.get("redirectUri");
+        clientDetails.setRegisteredRedirectUri(ImmutableSet.of(redirectUri));
+        resourceServersAndClientsToPersist.add(clientDetails);
+      });
+      resourceServers.forEach(resourceServerConfigObj -> {
 
-            final String redirectUri = (String) clientConfig.get("redirectUri");
-            clientDetails.setRegisteredRedirectUri(ImmutableSet.of(redirectUri));
+        final Map<String, Object> resourceServerConfig = resourceServerConfigObj.unwrapped();
+        final String clientId = (String) resourceServerConfig.get("clientId");
 
-            if (preExistingClientDetails.isPresent()) {
-              clientRegistrationService.updateClientDetails(clientDetails);
-              clientRegistrationService.updateClientSecret(clientDetails.getClientId(), secret);
-            } else {
-              clientRegistrationService.addClientDetails(clientDetails);
-            }
-          });
-          resourceServers.forEach(resourceServerConfigObj -> {
+        final Optional<ClientDetails> preExistingClientDetails = findPreExistingClientDetails(clientId, preExisting);
+        BaseClientDetails clientDetails = preExistingClientDetails.isPresent() ? (BaseClientDetails) preExistingClientDetails.get() : new BaseClientDetails(clientId, null, null, null, null);
 
-            final Map<String, Object> resourceServerConfig = resourceServerConfigObj.unwrapped();
-            final String clientId = (String) resourceServerConfig.get("clientId");
+        // always add the token checker role
+        clientDetails.setAuthorities(ImmutableList.of(new SimpleGrantedAuthority(AuthzServerApplication.ROLE_TOKEN_CHECKER)));
+        final String secret = (String) resourceServerConfig.get("secret");
+        clientDetails.setClientSecret(secret);
+        clientDetails.setAuthorizedGrantTypes(Collections.emptyList());
 
-            final Optional<ClientDetails> preExistingClientDetails =
-              preExisting.stream()
-                .filter(preExistingClient -> preExistingClient.getClientId().equals(clientId))
-                .findFirst();
+        resourceServersAndClientsToPersist.add(clientDetails);
+      });
 
-            BaseClientDetails clientDetails = preExistingClientDetails.isPresent() ? (BaseClientDetails) preExistingClientDetails.get() : new BaseClientDetails(clientId, null, null, null, null);
-            // always add the token checker role
-            clientDetails.setAuthorities(ImmutableList.of(new SimpleGrantedAuthority(AuthzServerApplication.ROLE_TOKEN_CHECKER)));
-            final String secret = (String) resourceServerConfig.get("secret");
-            clientDetails.setClientSecret(secret);
-            clientDetails.setAuthorizedGrantTypes(Collections.emptyList());
-            if (preExistingClientDetails.isPresent()) {
-              clientRegistrationService.updateClientDetails(clientDetails);
-              clientRegistrationService.updateClientSecret(clientDetails.getClientId(), secret);
-            } else {
-              clientRegistrationService.addClientDetails(clientDetails);
-            }
-          });
-          return null;
-        }
-      );
-
+      transactionTemplate.execute(transactionStatus -> {
+        resourceServersAndClientsToPersist.forEach(clientDetails -> {
+          if (findPreExistingClientDetails(clientDetails.getClientId(), preExisting).isPresent()) {
+            clientRegistrationService.updateClientDetails(clientDetails);
+            clientRegistrationService.updateClientSecret(clientDetails.getClientId(), clientDetails.getClientSecret());
+          } else {
+            clientRegistrationService.addClientDetails(clientDetails);
+          }
+        });
+        return null;
+      });
 
     } catch (IOException e) {
       throw new RuntimeException("Unable to read configuration", e);
     }
 
+
   }
+
+  private final Optional<ClientDetails> findPreExistingClientDetails(final String clientId, final List<ClientDetails> preExisting) {
+    return preExisting.stream()
+      .filter(preExistingClient -> preExistingClient.getClientId().equals(clientId))
+      .findFirst();
+  }
+
 }

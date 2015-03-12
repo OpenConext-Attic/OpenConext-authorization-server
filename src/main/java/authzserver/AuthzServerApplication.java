@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConv
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootApplication
 public class AuthzServerApplication {
@@ -37,6 +38,11 @@ public class AuthzServerApplication {
 
   public static final String ROLE_TOKEN_CHECKER = "ROLE_TOKEN_CHECKER";
 
+  @Bean
+  @Autowired
+  public TransactionTemplate transactionTemplate(PlatformTransactionManager platformTransactionManager) {
+    return new TransactionTemplate(platformTransactionManager);
+  }
 
   @Configuration
   @EnableAuthorizationServer
@@ -62,6 +68,9 @@ public class AuthzServerApplication {
 
     @Autowired
     private ResourceLoader resourceLoader;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
@@ -117,6 +126,7 @@ public class AuthzServerApplication {
         .passwordEncoder(passwordEncoder());
     }
 
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
       return new BCryptPasswordEncoder();
@@ -131,11 +141,11 @@ public class AuthzServerApplication {
     @Autowired
     public ClientsAndResourcesInitializer clientsAndResourcesInitializer(
       @Value("${defaultClientsAndResourceServers.config.path}") final String configFileLocation,
-      PlatformTransactionManager transactionManager) {
+      TransactionTemplate transactionTemplate) {
 
       final JdbcClientDetailsService jdbcClientDetailsService = new JdbcClientDetailsService(this.dataSource);
       jdbcClientDetailsService.setPasswordEncoder(this.passwordEncoder);
-      return new ClientsAndResourcesInitializer(jdbcClientDetailsService, resourceLoader.getResource(configFileLocation), transactionManager);
+      return new ClientsAndResourcesInitializer(jdbcClientDetailsService, resourceLoader.getResource(configFileLocation), transactionTemplate);
     }
   }
 }
