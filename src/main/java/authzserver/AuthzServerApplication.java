@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -119,5 +120,12 @@ public class AuthzServerApplication {
     public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
       configurer.jdbc(dataSource);
     }
+  }
+
+  @Bean
+  public FilterRegistrationBean debugFilter() {
+    FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+    filterRegistrationBean.setFilter(new CorsFilter());
+    return filterRegistrationBean;
   }
 }
