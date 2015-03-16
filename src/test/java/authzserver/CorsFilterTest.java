@@ -42,6 +42,7 @@ public class CorsFilterTest {
     String requestedRequestHeader = "Requested Request Headers";
     req.addHeader("Access-Control-Request-Method", "POST");
     req.addHeader("Access-Control-Request-Headers", requestedRequestHeader);
+    req.setMethod("OPTIONS");
 
     subject.doFilter(req, res, chain);
 
