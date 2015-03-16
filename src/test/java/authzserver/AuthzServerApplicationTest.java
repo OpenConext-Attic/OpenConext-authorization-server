@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {AuthzServerApplication.class, Oauth2ServerConfig.class}, initializers = ConfigFileApplicationContextInitializer.class)
@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 @DirtiesContext
 @ActiveProfiles("dev")
 public class AuthzServerApplicationTest {
+
   @Value("${local.server.port}")
   private int port;
 

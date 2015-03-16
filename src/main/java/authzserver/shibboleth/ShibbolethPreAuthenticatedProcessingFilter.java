@@ -15,6 +15,7 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
   public static final String COLLAB_PERSON_ID_HEADER_NAME = "name-id";
   public static final String SCHACH_HOME_ORGANIZATION_HEADER_NAME = "schachomeorganization";
   public static final String DISPLAY_NAME_HEADER_NAME = "displayname";
+  public static final String PERSISTENT_NAME_ID_PREFIX = "urn:collab:person:";
 
   private static final Logger LOG = LoggerFactory.getLogger(ShibbolethPreAuthenticatedProcessingFilter.class);
   private static final String EMPTY_HEADER_ERROR_TEMPLATE = "Header '%s' must be set";
@@ -33,6 +34,7 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
   protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
     String uid = request.getHeader(COLLAB_PERSON_ID_HEADER_NAME);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(uid), EMPTY_HEADER_ERROR_TEMPLATE, COLLAB_PERSON_ID_HEADER_NAME);
+    Preconditions.checkArgument(uid.startsWith(PERSISTENT_NAME_ID_PREFIX), "Header '%s' must start with '%s'. Actual value is '%'", COLLAB_PERSON_ID_HEADER_NAME, PERSISTENT_NAME_ID_PREFIX, uid);
 
     String schacHomeOrganization = request.getHeader(SCHACH_HOME_ORGANIZATION_HEADER_NAME);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(schacHomeOrganization), EMPTY_HEADER_ERROR_TEMPLATE, SCHACH_HOME_ORGANIZATION_HEADER_NAME);
