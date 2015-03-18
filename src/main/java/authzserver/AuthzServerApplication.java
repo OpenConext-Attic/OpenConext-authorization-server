@@ -123,7 +123,7 @@ public class AuthzServerApplication {
   }
 
   @Bean
-  public FilterRegistrationBean debugFilter() {
+  public FilterRegistrationBean corsFilter() {
     FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
     filterRegistrationBean.setFilter(new CorsFilter());
     return filterRegistrationBean;
