@@ -25,11 +25,6 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     setAuthenticationManager(authenticationManager);
   }
 
-  /**
-   * @param request
-   * @return ShibbolethPrincipal
-   * @throws java.lang.IllegalArgumentException when any of the required headers is not present.
-   */
   @Override
   protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
     String uid = request.getHeader(COLLAB_PERSON_ID_HEADER_NAME);
