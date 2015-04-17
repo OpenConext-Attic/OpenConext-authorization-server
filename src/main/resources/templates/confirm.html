@@ -3,7 +3,7 @@
 <head>
     <title th:text="#{confirm.page.title(${appName}, ${authorizationRequest.clientId})}">Confirm</title>
     <meta charset='utf-8'/>
-    <link rel="stylesheet" href="@{/css/bootstrap.min.css}"/>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link th:href="@{/css/main.css}" media="screen" rel="stylesheet"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 </head>
