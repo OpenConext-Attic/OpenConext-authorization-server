@@ -33,8 +33,10 @@
         <div class="form-group" th:each="scope: ${scopes}">
             <label class="col-sm-2 control-label" th:text="#{${scope.key}+.description} + ${':'}"></label>
 
-            <input type="radio" th:name="${scope.key}" value="true" checked="checked"/><label class="allowDeny" th:text="#{confirm.page.allow}"/>
-            <input type="radio" th:name="${scope.key}" value="false"/><label class="allowDeny" th:text="#{confirm.page.deny}"/>
+            <input type="radio" th:id="${scope.key} + 'allow'" th:name="${scope.key}" value="true" checked="checked"/>
+            <label class="allowDeny" th:for="${scope.key} + 'allow'" th:text="#{confirm.page.allow}"/>
+            <input type="radio" th:id="${scope.key} + 'deny'"  th:name="${scope.key}" value="false"/>
+            <label class="allowDeny" th:for="${scope.key} + 'deny'" th:text="#{confirm.page.deny}"/>
         </div>
 
         <div class="col-sm-offset-2 col-sm-10">
