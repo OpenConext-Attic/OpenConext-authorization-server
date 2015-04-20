@@ -8,9 +8,9 @@ Connect to your local mysql database: `mysql -uroot`
 Execute the following:
 
 ```sql
-CREATE DATABASE oauth2_server_db DEFAULT CHARACTER SET latin1;
-create user 'oauth2_server'@'localhost' identified by 'oauth2_server';
-grant all on oauth2_server_db.* to 'oauth2_server'@'localhost';
+CREATE DATABASE `authz-server` DEFAULT CHARACTER SET latin1;
+create user 'authz-serverrw'@'localhost' identified by 'secret';
+grant all on `authz-server`.* to 'authz-serverrw'@'localhost';
 ```
 
 # Start the app
