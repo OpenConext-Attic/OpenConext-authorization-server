@@ -16,8 +16,7 @@
 </div>
 <div class="container main">
 
-
-    <h1 th:text="#{confirm.page.greeting(${displayName})}"></h1>
+    <h1 th:text="#{confirm.page.greeting}"></h1>
 
     <form id="confirmationForm" name="confirmationForm" class="form-horizontal" action='/oauth/authorize' method='post'>
         <input name="user_oauth_approval" value="true" type="hidden"/>

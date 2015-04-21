@@ -61,8 +61,7 @@ public class MockShibbolethFilter extends GenericFilterBean {
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
     SetHeader wrapper = new SetHeader((HttpServletRequest) servletRequest);
     wrapper.setHeader(ShibbolethPreAuthenticatedProcessingFilter.COLLAB_PERSON_ID_HEADER_NAME, "urn:collab:person:example.com:admin");
-    wrapper.setHeader(ShibbolethPreAuthenticatedProcessingFilter.SCHACH_HOME_ORGANIZATION_HEADER_NAME,"surfnet.nl");
-    wrapper.setHeader(ShibbolethPreAuthenticatedProcessingFilter.DISPLAY_NAME_HEADER_NAME,"Mock Saml2-Authenticated User");
+    wrapper.setHeader(ShibbolethPreAuthenticatedProcessingFilter.SCHACH_HOME_ORGANIZATION_HEADER_NAME, "surfnet.nl");
     filterChain.doFilter(wrapper, servletResponse);
   }
 }

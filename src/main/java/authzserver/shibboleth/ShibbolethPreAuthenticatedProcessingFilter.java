@@ -14,7 +14,6 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
 
   public static final String COLLAB_PERSON_ID_HEADER_NAME = "name-id";
   public static final String SCHACH_HOME_ORGANIZATION_HEADER_NAME = "schachomeorganization";
-  public static final String DISPLAY_NAME_HEADER_NAME = "displayname";
   public static final String PERSISTENT_NAME_ID_PREFIX = "urn:collab:person:";
 
   private static final Logger LOG = LoggerFactory.getLogger(ShibbolethPreAuthenticatedProcessingFilter.class);
@@ -34,10 +33,7 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     String schacHomeOrganization = request.getHeader(SCHACH_HOME_ORGANIZATION_HEADER_NAME);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(schacHomeOrganization), EMPTY_HEADER_ERROR_TEMPLATE, SCHACH_HOME_ORGANIZATION_HEADER_NAME);
 
-    String displayName = request.getHeader(DISPLAY_NAME_HEADER_NAME);
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(displayName), EMPTY_HEADER_ERROR_TEMPLATE, DISPLAY_NAME_HEADER_NAME);
-
-    final ShibbolethPrincipal shibbolethPrincipal = new ShibbolethPrincipal(uid, schacHomeOrganization, displayName);
+    final ShibbolethPrincipal shibbolethPrincipal = new ShibbolethPrincipal(uid, schacHomeOrganization);
     LOG.debug("Assembled Shibboleth principal from headers: {}", shibbolethPrincipal);
     return shibbolethPrincipal;
   }
@@ -51,12 +47,10 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
 
     public final String username;
     public final String schacHomeOrganization;
-    public final String displayName;
 
-    public ShibbolethPrincipal(String username, String schacHomeOrganization, String displayName) {
+    public ShibbolethPrincipal(String username, String schacHomeOrganization) {
       this.username = username;
       this.schacHomeOrganization = schacHomeOrganization;
-      this.displayName = displayName;
     }
 
     @Override
@@ -64,7 +58,6 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
       return "ShibbolethPrincipal{" +
         "username='" + username + '\'' +
         ", schacHomeOrganization='" + schacHomeOrganization + '\'' +
-        ", displayName='" + displayName + '\'' +
         '}';
     }
   }

@@ -26,29 +26,22 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
 
     private final String username;
     private final String schacHomeOrganization;
-    private final String displayName;
 
     @Override
     public String toString() {
       return "ShibbolethUser{" +
         "username='" + username + '\'' +
         ", schacHomeOrganization='" + schacHomeOrganization + '\'' +
-        ", displayName='" + displayName + '\'' +
         '}';
     }
 
-    public ShibbolethUser(String username, String schacHomeOrganization, String displayName) {
+    public ShibbolethUser(String username, String schacHomeOrganization) {
       this.username = username;
       this.schacHomeOrganization = schacHomeOrganization;
-      this.displayName = displayName;
     }
 
     public String getSchacHomeOrganization() {
       return schacHomeOrganization;
-    }
-
-    public String getDisplayName() {
-      return displayName;
     }
 
     @Override
@@ -90,6 +83,6 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
   @Override
   public UserDetails loadUserDetails(final PreAuthenticatedAuthenticationToken authentication) throws UsernameNotFoundException {
     ShibbolethPrincipal shibbolethPrincipal = (ShibbolethPrincipal) authentication.getPrincipal();
-    return new ShibbolethUser(shibbolethPrincipal.username, shibbolethPrincipal.schacHomeOrganization, shibbolethPrincipal.displayName);
+    return new ShibbolethUser(shibbolethPrincipal.username, shibbolethPrincipal.schacHomeOrganization);
   }
 }
