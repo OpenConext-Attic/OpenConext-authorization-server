@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,8 +42,6 @@ public class CustomApprovalEndpoint {
 
     model.put("logoUrl", logoUrl);
     model.put("appName", appName);
-
-    model.put("displayName", shibbolethUser.getDisplayName());
     return new ModelAndView("confirm", model);
   }
 }
