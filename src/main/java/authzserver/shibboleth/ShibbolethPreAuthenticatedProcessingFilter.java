@@ -13,7 +13,7 @@ import com.google.common.base.Strings;
 public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
   public static final String COLLAB_PERSON_ID_HEADER_NAME = "name-id";
-  public static final String SCHACH_HOME_ORGANIZATION_HEADER_NAME = "schachomeorganization";
+  public static final String SCHAC_HOME_ORGANIZATION_HEADER_NAME = "schachomeorganization";
   public static final String PERSISTENT_NAME_ID_PREFIX = "urn:collab:person:";
 
   private static final Logger LOG = LoggerFactory.getLogger(ShibbolethPreAuthenticatedProcessingFilter.class);
@@ -30,8 +30,8 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     Preconditions.checkArgument(!Strings.isNullOrEmpty(uid), EMPTY_HEADER_ERROR_TEMPLATE, COLLAB_PERSON_ID_HEADER_NAME);
     Preconditions.checkArgument(uid.startsWith(PERSISTENT_NAME_ID_PREFIX), "Header '%s' must start with '%s'. Actual value is '%'", COLLAB_PERSON_ID_HEADER_NAME, PERSISTENT_NAME_ID_PREFIX, uid);
 
-    String schacHomeOrganization = request.getHeader(SCHACH_HOME_ORGANIZATION_HEADER_NAME);
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(schacHomeOrganization), EMPTY_HEADER_ERROR_TEMPLATE, SCHACH_HOME_ORGANIZATION_HEADER_NAME);
+    String schacHomeOrganization = request.getHeader(SCHAC_HOME_ORGANIZATION_HEADER_NAME);
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(schacHomeOrganization), EMPTY_HEADER_ERROR_TEMPLATE, SCHAC_HOME_ORGANIZATION_HEADER_NAME);
 
     final ShibbolethPrincipal shibbolethPrincipal = new ShibbolethPrincipal(uid, schacHomeOrganization);
     LOG.debug("Assembled Shibboleth principal from headers: {}", shibbolethPrincipal);
