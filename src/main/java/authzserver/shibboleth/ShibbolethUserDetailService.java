@@ -26,22 +26,43 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
 
     private final String username;
     private final String schacHomeOrganization;
+    private final String displayName;
+    private final String authenticatingAuthority;
+    private final String email;
 
     @Override
     public String toString() {
       return "ShibbolethUser{" +
         "username='" + username + '\'' +
         ", schacHomeOrganization='" + schacHomeOrganization + '\'' +
+        ", displayName='" + displayName + '\'' +
+        ", authenticatingAuthority='" + authenticatingAuthority + '\'' +
+        ", email='" + email + '\'' +
         '}';
     }
 
-    public ShibbolethUser(String username, String schacHomeOrganization) {
+    public ShibbolethUser(String username, String schacHomeOrganization, String displayName, String authenticatingAuthority, String email) {
       this.username = username;
       this.schacHomeOrganization = schacHomeOrganization;
+      this.displayName = displayName;
+      this.authenticatingAuthority = authenticatingAuthority;
+      this.email = email;
     }
 
     public String getSchacHomeOrganization() {
       return schacHomeOrganization;
+    }
+
+    public String getDisplayName() {
+      return displayName;
+    }
+
+    public String getAuthenticatingAuthority() {
+      return authenticatingAuthority;
+    }
+
+    public String getEmail() {
+      return email;
     }
 
     @Override
@@ -83,6 +104,6 @@ public class ShibbolethUserDetailService implements AuthenticationUserDetailsSer
   @Override
   public UserDetails loadUserDetails(final PreAuthenticatedAuthenticationToken authentication) throws UsernameNotFoundException {
     ShibbolethPrincipal shibbolethPrincipal = (ShibbolethPrincipal) authentication.getPrincipal();
-    return new ShibbolethUser(shibbolethPrincipal.username, shibbolethPrincipal.schacHomeOrganization);
+    return new ShibbolethUser(shibbolethPrincipal.username, shibbolethPrincipal.schacHomeOrganization, shibbolethPrincipal.displayName, shibbolethPrincipal.authenticatingAuthority, shibbolethPrincipal.email);
   }
 }

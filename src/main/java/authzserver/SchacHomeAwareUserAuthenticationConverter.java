@@ -11,15 +11,15 @@ import com.google.common.collect.ImmutableMap;
 
 public class SchacHomeAwareUserAuthenticationConverter extends DefaultUserAuthenticationConverter {
 
-  public static final String SCHAC_HOME_KEY = "schacHomeOrganization";
-
   @Override
   public Map<String, ?> convertUserAuthentication(final Authentication authentication) {
     final Map<String, ?> basic = super.convertUserAuthentication(authentication);
     final ShibbolethUser shibbolethUser = (ShibbolethUser) authentication.getPrincipal();
     return ImmutableMap.<String, Object>builder().
       putAll(basic).
-      put(SCHAC_HOME_KEY, shibbolethUser.getSchacHomeOrganization()).
+      put("schacHomeOrganization", shibbolethUser.getSchacHomeOrganization()).
+      put("email", shibbolethUser.getEmail()).
+      put("authenticatingAuthority", shibbolethUser.getAuthenticatingAuthority()).
       build();
   }
 
