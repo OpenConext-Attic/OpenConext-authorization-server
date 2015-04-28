@@ -14,6 +14,7 @@
     <div class="main">
         <h1 th:text="#{error.page.greeting}"></h1>
         <p th:text="#{error.page.message}"></p>
+        <p th:text="#{error.page.email}"></p><a th:href="'mailto:' + ${@environment.getProperty('errorPage.email')}" th:text="${@environment.getProperty('errorPage.email')}"></a>
     </div>
 </div>
 
