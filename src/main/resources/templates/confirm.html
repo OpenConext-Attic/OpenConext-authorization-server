@@ -13,35 +13,33 @@
         <img th:src="${logoUrl}" th:alt="${appName}"/>
         <h1 th:text="${appName}"></h1>
     </header>
-</div>
-<div class="container main">
+    <div class="main">
+        <h1 th:text="#{confirm.page.greeting}"></h1>
+        <form id="confirmationForm" name="confirmationForm" class="form-horizontal" action='/oauth/authorize' method='post'>
+            <input name="user_oauth_approval" value="true" type="hidden"/>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-    <h1 th:text="#{confirm.page.greeting}"></h1>
+            <div class="alert alert-info" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span th:text="#{confirm.page.alert(${authorizationRequest.clientId})}"></span>
+            </div>
 
-    <form id="confirmationForm" name="confirmationForm" class="form-horizontal" action='/oauth/authorize' method='post'>
-        <input name="user_oauth_approval" value="true" type="hidden"/>
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <p th:text="#{confirm.page.formHeader(${authorizationRequest.clientId})}"></p>
 
-        <div class="alert alert-info" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span th:text="#{confirm.page.alert(${authorizationRequest.clientId})}"></span>
-        </div>
+            <div class="form-group" th:each="scope: ${scopes}">
+                <label class="col-sm-2 control-label" th:text="#{${scope.key}+.description} + ${':'}"></label>
 
-        <p th:text="#{confirm.page.formHeader(${authorizationRequest.clientId})}"></p>
+                <input type="radio" th:id="${scope.key} + 'allow'" th:name="${scope.key}" value="true" checked="checked"/>
+                <label class="allowDeny" th:for="${scope.key} + 'allow'" th:text="#{confirm.page.allow}"/>
+                <input type="radio" th:id="${scope.key} + 'deny'"  th:name="${scope.key}" value="false"/>
+                <label class="allowDeny" th:for="${scope.key} + 'deny'" th:text="#{confirm.page.deny}"/>
+            </div>
 
-        <div class="form-group" th:each="scope: ${scopes}">
-            <label class="col-sm-2 control-label" th:text="#{${scope.key}+.description} + ${':'}"></label>
-
-            <input type="radio" th:id="${scope.key} + 'allow'" th:name="${scope.key}" value="true" checked="checked"/>
-            <label class="allowDeny" th:for="${scope.key} + 'allow'" th:text="#{confirm.page.allow}"/>
-            <input type="radio" th:id="${scope.key} + 'deny'"  th:name="${scope.key}" value="false"/>
-            <label class="allowDeny" th:for="${scope.key} + 'deny'" th:text="#{confirm.page.deny}"/>
-        </div>
-
-        <div class="col-sm-offset-2 col-sm-10">
-            <button name="authorize" class="btn btn-primary" type="submit" th:text="#{confirm.page.submit}"></button>
-        </div>
-    </form>
+            <div class="col-sm-offset-2 col-sm-10">
+                <button name="authorize" class="btn btn-primary" type="submit" th:text="#{confirm.page.submit}"></button>
+            </div>
+        </form>
+    </div>
 </div>
 </body>
 </html>
