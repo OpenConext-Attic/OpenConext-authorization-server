@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{error.page.title}">Confirm</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/main.css}" media="screen" rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+</head>
+<body>
+<div class="container">
+    <header class="page-header myHeader">
+        <img th:src="${@environment.getProperty('confirmPage.logoUrl')}" th:alt="${@environment.getProperty('confirmPage.appName')}"/>
+    </header>
+    <div class="main">
+        <h1 th:text="#{error.page.greeting}"></h1>
+        <p th:text="#{error.page.message}"></p>
+    </div>
+</div>
+
+</body>
+</html>
