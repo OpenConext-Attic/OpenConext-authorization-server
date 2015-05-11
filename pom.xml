@@ -5,7 +5,7 @@
 
   <groupId>org.openconext</groupId>
   <artifactId>authz-server</artifactId>
-  <version>1-SNAPSHOT</version>
+  <version>1</version>
   <packaging>jar</packaging>
 
   <name>OpenConext oauth2 server</name>
