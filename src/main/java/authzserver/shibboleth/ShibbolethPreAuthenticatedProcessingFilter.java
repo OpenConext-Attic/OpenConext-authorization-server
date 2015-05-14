@@ -38,7 +38,6 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     String email = request.getHeader("Shib-InetOrgPerson-mail");
 
     String displayName = request.getHeader(DISPLAY_NAME_HEADER_NAME);
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(displayName), EMPTY_HEADER_ERROR_TEMPLATE, DISPLAY_NAME_HEADER_NAME);
 
     String authenticatingAuthorities = request.getHeader(SHIB_AUTHENTICATING_AUTHORITY);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(authenticatingAuthorities), EMPTY_HEADER_ERROR_TEMPLATE, SHIB_AUTHENTICATING_AUTHORITY);
