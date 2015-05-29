@@ -49,7 +49,7 @@ public class AuthzServerApplicationTest {
 
     HttpHeaders headers = getShibHttpHeaders();
 
-    stubFor(get(urlMatching("/callback.*")).withQueryParam("code", matching(".*")).willReturn(aResponse().withStatus(200)));
+    wireMockRule.stubFor(get(urlMatching("/callback.*")).withQueryParam("code", matching(".*")).willReturn(aResponse().withStatus(200)));
 
     ResponseEntity<String> response = template.exchange(serverUrl + "/oauth/authorize?response_type=code&client_id=test_client&scope=read&redirect_uri={callback}", HttpMethod.GET, new HttpEntity<>(headers), String.class, callback);
     assertEquals(200, response.getStatusCode().value());
