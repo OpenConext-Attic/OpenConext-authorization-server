@@ -63,9 +63,16 @@ public class AuthzServerApplicationTest {
 
     MultiValueMap<String, String> bodyMap = getAuthorizationCodeFormParameters(authorizationCode);
 
-    ResponseEntity<Map> postResponse = template.exchange(serverUrl + "/oauth/token", HttpMethod.POST, new HttpEntity<>(bodyMap, headers), Map.class);
-    assertEquals("bearer", postResponse.getBody().get("token_type"));
-    assertNotNull(postResponse.getBody().get("access_token"));
+    Map body = template.exchange(serverUrl + "/oauth/token", HttpMethod.POST, new HttpEntity<>(bodyMap, headers), Map.class).getBody();
+    assertEquals("bearer", body.get("token_type"));
+    String accessToken = (String) body.get("access_token");
+    assertNotNull(accessToken);
+
+    // Now for the completeness of the scenario retrieve the Principal (e.g. impersonating a Resource Server) using the accessCode
+    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+    formData.add("token", accessToken);
+    Map principal = template.exchange(serverUrl + "/oauth/check_token", HttpMethod.POST, new HttpEntity<>(formData, headers), Map.class).getBody();
+    assertEquals("urn:collab:person:example.com:mock-user", principal.get("user_name"));
 
   }
 

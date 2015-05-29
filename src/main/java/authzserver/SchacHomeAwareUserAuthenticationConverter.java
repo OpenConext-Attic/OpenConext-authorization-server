@@ -1,26 +1,25 @@
 package authzserver;
 
-import static authzserver.shibboleth.ShibbolethUserDetailService.ShibbolethUser;
-
-import java.util.Map;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
+import java.util.Map;
+
+import static authzserver.shibboleth.ShibbolethUserDetailService.ShibbolethUser;
 
 public class SchacHomeAwareUserAuthenticationConverter extends DefaultUserAuthenticationConverter {
 
   @Override
-  public Map<String, ?> convertUserAuthentication(final Authentication authentication) {
-    final Map<String, ?> basic = super.convertUserAuthentication(authentication);
-    final ShibbolethUser shibbolethUser = (ShibbolethUser) authentication.getPrincipal();
-    return ImmutableMap.<String, Object>builder().
-      putAll(basic).
-      put("schacHomeOrganization", shibbolethUser.getSchacHomeOrganization()).
-      put("email", shibbolethUser.getEmail()).
-      put("authenticatingAuthority", shibbolethUser.getAuthenticatingAuthority()).
-      build();
+  public Map<String, ?> convertUserAuthentication(Authentication authentication) {
+    Map<String, ?> basic = super.convertUserAuthentication(authentication);
+    ShibbolethUser shibbolethUser = (ShibbolethUser) authentication.getPrincipal();
+    Map<String, Object> result = new HashMap<>(basic);
+
+    result.put("schacHomeOrganization", shibbolethUser.getSchacHomeOrganization());
+    result.put("authenticatingAuthority", shibbolethUser.getAuthenticatingAuthority());
+    result.put("email", shibbolethUser.getEmail());
+    return result;
   }
 
 }
