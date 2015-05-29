@@ -3,7 +3,6 @@ package authzserver;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import org.apache.commons.codec.binary.Base64;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,25 +36,17 @@ public class AuthzServerApplicationTest {
   @Value("${local.server.port}")
   private int port;
 
-  private String serverUrl;
-
-  private RestTemplate template = new RestTemplate();
-
-  ///See OpenConext-authorization-server/src/test/resources/db/migration/V3___test_client_details.sql
-  private String authenticationCredentials = "Basic " + new String(Base64.encodeBase64(new String("test_client" + ":" + "secret").getBytes(Charset.forName("UTF-8"))));
-
   private String callback = "http://localhost:8889/callback";
 
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(8889);
 
-  @Before
-  public void before() {
-    serverUrl = "http://localhost:" + this.port;
-  }
-
   @Test
   public void test_skip_confirmation_autoapprove_true() throws InterruptedException {
+    String serverUrl = "http://localhost:" + this.port;
+
+    RestTemplate template = new RestTemplate();
+
     HttpHeaders headers = getShibHttpHeaders();
 
     stubFor(get(urlMatching("/callback.*")).withQueryParam("code", matching(".*")).willReturn(aResponse().withStatus(200)));
@@ -87,6 +78,8 @@ public class AuthzServerApplicationTest {
   }
 
   private void addAuthorizationHeaders(HttpHeaders headers) {
+    ///See OpenConext-authorization-server/src/test/resources/db/migration/V3___test_client_details.sql
+    String authenticationCredentials = "Basic " + new String(Base64.encodeBase64(new String("test_client" + ":" + "secret").getBytes(Charset.forName("UTF-8"))));
     headers.add("Authorization", authenticationCredentials);
     headers.add("Content-Type", "application/x-www-form-urlencoded");
     headers.add("Accept", "application/json");
