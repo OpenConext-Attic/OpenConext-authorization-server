@@ -25,6 +25,14 @@ import org.springframework.security.oauth2.provider.request.DefaultOAuth2Request
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+
+import java.util.Locale;
 
 @SpringBootApplication
 public class AuthzServerApplication {
@@ -128,4 +136,31 @@ public class AuthzServerApplication {
     filterRegistrationBean.setFilter(new CorsFilter());
     return filterRegistrationBean;
   }
+
+  @Bean
+  public LocaleResolver localeResolver() {
+    CookieLocaleResolver slr = new CookieLocaleResolver();
+    slr.setDefaultLocale(Locale.ENGLISH);
+    return slr;
+  }
+
+  @Bean
+  public LocaleChangeInterceptor localeChangeInterceptor() {
+    LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
+    lci.setParamName("lang");
+    return lci;
+  }
+
+  @Bean
+  public WebMvcConfigurerAdapter adapter() {
+    return new WebMvcConfigurerAdapter() {
+      @Override
+      public void addInterceptors(InterceptorRegistry registry) {
+        super.addInterceptors(registry);
+        registry.addInterceptor(localeChangeInterceptor());
+      }
+    };
+  }
+
+
 }

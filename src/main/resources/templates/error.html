@@ -1,22 +1,57 @@
-<!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie10 lt-ie9 lt-ie8 lt-ie7" lang="en-us"> <![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie10 lt-ie9 lt-ie8" lang="en-us"> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie10 lt-ie9" lang="en-us"> <![endif]-->
+<!--[if IE 9]>
+<html class="no-js lt-ie10 lt-ie9" lang="en-us"> <![endif]-->
+<!--[if lt IE 10]>
+<html class="no-js lt-ie10" lang="en-us"> <![endif]-->
+<!--[if !IE]> > <![endif]-->
+<html class='no-js' lang='en' xmlns:th="http://www.thymeleaf.org">
+<!-- <![endif] -->
 <head>
-    <title th:text="#{error.page.title}">Confirm</title>
-    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link th:href="@{/css/main.css}" media="screen" rel="stylesheet"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>SURFconext</title>
+    <meta charset='utf-8' content='text/html' http-equiv='content-type'/>
+    <meta content='ie=edge,chrome=1' http-equiv='x-ua-compatible'/>
+    <meta content='' name='description'/>
+    <meta content='' name='author'/>
+    <meta content='initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width' name='viewport'/>
+    <meta content='initial-scale=1.0,user-scalable=no,maximum-scale=1' media='(device-height: 568px)' name='viewport'/>
+    <meta content='yes' name='apple-mobile-web-app-capable'/>
+    <meta content='translucent-black' name='apple-mobile-web-app-status-bar-style'/>
+    <link th:href="@{/css/application.css}" media="screen" rel="stylesheet"/>
 </head>
-<body>
-<div class="container">
-    <header class="page-header myHeader">
-        <img th:src="${@environment.getProperty('confirmPage.logoUrl')}" th:alt="${@environment.getProperty('confirmPage.appName')}"/>
-    </header>
-    <div class="main">
-        <h1 th:text="#{error.page.greeting}"></h1>
-        <p th:text="#{error.page.message}"></p>
-        <p th:text="#{error.page.email}"></p><a th:href="'mailto:' + ${@environment.getProperty('errorPage.email')}" th:text="${@environment.getProperty('errorPage.email')}"></a>
+<body class='index'>
+<div class='mod-header'>
+    <h1 class='title' th:text="#{error.page.header}"></h1>
+
+    <div class='meta'>
+        <ul class='comp-language'>
+            <li>
+                <a data-lang="en" th:class="__${#locale}__=='en'?'selected':''" href='#'>EN</a>
+            </li>
+            <li>
+                <a data-lang="nl" th:class="__${#locale}__=='nl'?'selected':''" href='#'>NL</a>
+            </li>
+        </ul>
     </div>
 </div>
-
+<div class='l-container'>
+    <div class='box'>
+        <div class='mod-content'>
+            <header>
+                <img th:src="@{/images/team.svg}"/>
+                <h1 th:text="#{error.page.greeting}"></h1>
+            </header>
+            <p th:text="#{error.page.message}"></p>
+            <p th:text="#{error.page.email}"></p><a th:href="'mailto:' + ${@environment.getProperty('errorPage.email')}" th:text="${@environment.getProperty('errorPage.email')}"></a>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/jquery-2.1.4.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
 </body>
 </html>

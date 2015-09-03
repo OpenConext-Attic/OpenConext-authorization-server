@@ -29,7 +29,7 @@ public class ShibbolethSecurityConfig extends WebSecurityConfigurerAdapter {
   public FilterRegistrationBean mockShibbolethFilter() {
     FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
     filterRegistrationBean.setFilter(new MockShibbolethFilter());
-    filterRegistrationBean.addUrlPatterns("/oauth/authorize");
+    filterRegistrationBean.addUrlPatterns("/oauth/authorize", "/oauth/confirm");
     return filterRegistrationBean;
   }
 

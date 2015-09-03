@@ -12,6 +12,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.GenericFilterBean;
@@ -62,6 +64,8 @@ public class MockShibbolethFilter extends GenericFilterBean {
     SetHeader wrapper = new SetHeader((HttpServletRequest) servletRequest);
     wrapper.setHeader(ShibbolethPreAuthenticatedProcessingFilter.COLLAB_PERSON_ID_HEADER_NAME, "urn:collab:person:example.com:admin");
     wrapper.setHeader(ShibbolethPreAuthenticatedProcessingFilter.SCHAC_HOME_ORGANIZATION_HEADER_NAME, "surfnet.nl");
+    wrapper.setHeader(ShibbolethPreAuthenticatedProcessingFilter.SHIB_AUTHENTICATING_AUTHORITY, "engineblock.org");
+
     filterChain.doFilter(wrapper, servletResponse);
   }
 }

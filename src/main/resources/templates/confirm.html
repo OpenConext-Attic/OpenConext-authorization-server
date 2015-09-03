@@ -1,45 +1,89 @@
-<!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie10 lt-ie9 lt-ie8 lt-ie7" lang="en-us"> <![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie10 lt-ie9 lt-ie8" lang="en-us"> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie10 lt-ie9" lang="en-us"> <![endif]-->
+<!--[if IE 9]>
+<html class="no-js lt-ie10 lt-ie9" lang="en-us"> <![endif]-->
+<!--[if lt IE 10]>
+<html class="no-js lt-ie10" lang="en-us"> <![endif]-->
+<!--[if !IE]> > <![endif]-->
+<html class='no-js' lang='en' xmlns:th="http://www.thymeleaf.org">
+<!-- <![endif] -->
 <head>
-    <title th:text="#{confirm.page.title(${appName}, ${authorizationRequest.clientId})}">Confirm</title>
-    <meta charset='utf-8'/>
-    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link th:href="@{/css/main.css}" media="screen" rel="stylesheet"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>SURFconext</title>
+    <meta charset='utf-8' content='text/html' http-equiv='content-type'/>
+    <meta content='ie=edge,chrome=1' http-equiv='x-ua-compatible'/>
+    <meta content='' name='description'/>
+    <meta content='' name='author'/>
+    <meta content='initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width' name='viewport'/>
+    <meta content='initial-scale=1.0,user-scalable=no,maximum-scale=1' media='(device-height: 568px)' name='viewport'/>
+    <meta content='yes' name='apple-mobile-web-app-capable'/>
+    <meta content='translucent-black' name='apple-mobile-web-app-status-bar-style'/>
+    <link th:href="@{/css/application.css}" media="screen" rel="stylesheet"/>
+    <link th:href="@{/css/custom.css}" media="screen" rel="stylesheet"/>
 </head>
-<body>
-<div class="container">
-    <header class="page-header myHeader">
-        <img th:src="${logoUrl}" th:alt="${appName}"/>
-        <h1 th:text="${appName}"></h1>
-    </header>
-    <div class="main">
-        <h1 th:text="#{confirm.page.greeting}"></h1>
-        <form id="confirmationForm" name="confirmationForm" class="form-horizontal" action='/oauth/authorize' method='post'>
-            <input name="user_oauth_approval" value="true" type="hidden"/>
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+<body class='index'>
+<div class='mod-header'>
+    <h1 class='title' th:text="#{confirm.page.greeting(${appName})}"></h1>
 
-            <div class="alert alert-info" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span th:text="#{confirm.page.alert(${authorizationRequest.clientId})}"></span>
-            </div>
-
-            <p th:text="#{confirm.page.formHeader(${authorizationRequest.clientId})}"></p>
-
-            <div class="form-group" th:each="scope: ${scopes}">
-                <label class="col-sm-2 control-label" th:text="#{${scope.key}+.description} + ${':'}"></label>
-
-                <input type="radio" th:id="${scope.key} + 'allow'" th:name="${scope.key}" value="true" checked="checked"/>
-                <label class="allowDeny" th:for="${scope.key} + 'allow'" th:text="#{confirm.page.allow}"/>
-                <input type="radio" th:id="${scope.key} + 'deny'"  th:name="${scope.key}" value="false"/>
-                <label class="allowDeny" th:for="${scope.key} + 'deny'" th:text="#{confirm.page.deny}"/>
-            </div>
-
-            <div class="col-sm-offset-2 col-sm-10">
-                <button name="authorize" class="btn btn-primary" type="submit" th:text="#{confirm.page.submit}"></button>
-            </div>
-        </form>
+    <div class='meta'>
+        <ul class='comp-language'>
+            <li>
+                <a data-lang="en" th:class="__${#locale}__=='en'?'selected':''" href='#'>EN</a>
+            </li>
+            <li>
+                <a data-lang="nl" th:class="__${#locale}__=='nl'?'selected':''" href='#'>NL</a>
+            </li>
+        </ul>
     </div>
 </div>
+<div class='l-container'>
+    <div class='box'>
+        <div class='mod-content'>
+            <header>
+                <img th:src="@{/images/team.svg}"/>
+
+                <h1 th:text="#{confirm.page.formHeader(${appName})}"></h1>
+            </header>
+
+            <p th:text="#{confirm.page.text(${authorizationRequest.clientId})}"></p>
+
+            <form id="confirmationForm" name="confirmationForm" class="form-horizontal" action='/oauth/authorize'
+                  method='post'>
+                <input name="user_oauth_approval" value="true" type="hidden"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <ul>
+                    <li th:each="scope: ${scopes}">
+                        <label th:text="#{${scope.key}+.description}"></label>
+                        <input type="hidden" th:id="${scope.key} + 'allow'" th:name="${scope.key}" value="true"/>
+                    </li>
+                </ul>
+
+                <button name="authorize" class="c-button mr" type="submit" th:text="#{confirm.page.submit}"></button>
+                <a class="deny-link" data-deny="true" th:attr="data-error-msg=#{confirm.page.alert}" href="#" th:text="#{confirm.page.deny}"></a>
+            </form>
+
+        </div>
+    </div>
+</div>
+<div class='l-footer' id='footer'>
+    <nav class='mod-footer'>
+        <p th:utext="#{confirm.page.footer}"></p>
+        <ul class='comp-language'>
+            <li>
+                <a data-lang="en" th:class="__${#locale}__=='en'?'selected':''" href='#'>EN</a>
+            </li>
+            <li>
+                <a data-lang="nl" th:class="__${#locale}__=='nl'?'selected':''" href='#'>NL</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<script th:src="@{/js/jquery-2.1.4.min.js}"></script>
+<script th:src="@{/js/main.js}"></script>
 </body>
 </html>
