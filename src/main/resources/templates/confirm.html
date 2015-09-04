@@ -22,7 +22,7 @@
     <meta content='initial-scale=1.0,user-scalable=no,maximum-scale=1' media='(device-height: 568px)' name='viewport'/>
     <meta content='yes' name='apple-mobile-web-app-capable'/>
     <meta content='translucent-black' name='apple-mobile-web-app-status-bar-style'/>
-    <link th:href="@{/css/application.css}" media="screen" rel="stylesheet"/>
+    <link th:href="@{/css/app.css}" media="screen" rel="stylesheet"/>
     <link th:href="@{/css/custom.css}" media="screen" rel="stylesheet"/>
 </head>
 <body class='index'>
@@ -72,15 +72,28 @@
 </div>
 <div class='l-footer' id='footer'>
     <nav class='mod-footer'>
-        <p th:utext="#{confirm.page.footer}"></p>
-        <ul class='comp-language'>
-            <li>
-                <a data-lang="en" th:class="__${#locale}__=='en'?'selected':''" href='#'>EN</a>
+        <ul class="footer-menu">
+            <li class="nav-row left"><p th:utext="#{confirm.page.footer}"></p></li>
+            <li class="nav-row">
+                <ul class='comp-language'>
+                    <li>
+                        <a data-lang="en" th:class="__${#locale}__=='en'?'selected':''" href='#'>EN</a>
+                    </li>
+                    <li>
+                        <a data-lang="nl" th:class="__${#locale}__=='nl'?'selected':''" href='#'>NL</a>
+                    </li>
+                </ul>
             </li>
-            <li>
-                <a data-lang="nl" th:class="__${#locale}__=='nl'?'selected':''" href='#'>NL</a>
+            <li class="nav-row right">
+                <ul class="comp-links">
+                    <li>
+                        <a target="_blank"  th:text="#{confirm.page.service}" th:href="#{confirm.page.service.link}"></a>
+                    </li>
+                </ul>
             </li>
         </ul>
+
+
     </nav>
 </div>
 <script th:src="@{/js/jquery-2.1.4.min.js}"></script>
