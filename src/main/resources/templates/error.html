@@ -51,6 +51,19 @@
         </div>
     </div>
 </div>
+<div class='l-footer' id='footer'>
+    <nav class='mod-footer'>
+        <p th:utext="#{confirm.page.footer}"></p>
+        <ul class='comp-language'>
+            <li>
+                <a data-lang="en" th:class="__${#locale}__=='en'?'selected':''" href='#'>EN</a>
+            </li>
+            <li>
+                <a data-lang="nl" th:class="__${#locale}__=='nl'?'selected':''" href='#'>NL</a>
+            </li>
+        </ul>
+    </nav>
+</div>
 <script th:src="@{/js/jquery-2.1.4.min.js}"></script>
 <script th:src="@{/js/main.js}"></script>
 </body>
