@@ -49,7 +49,7 @@
                 <h1 th:text="#{confirm.page.formHeader(${appName})}"></h1>
             </header>
 
-            <p th:text="#{confirm.page.text(${authorizationRequest.clientId})}"></p>
+            <p th:utext="#{confirm.page.text(${authorizationRequest.clientId})}"></p>
 
             <form id="confirmationForm" name="confirmationForm" class="form-horizontal" action='/oauth/authorize'
                   method='post'>
