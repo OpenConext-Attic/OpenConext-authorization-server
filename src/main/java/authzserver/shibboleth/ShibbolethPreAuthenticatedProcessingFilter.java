@@ -43,9 +43,9 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     Preconditions.checkArgument(!Strings.isNullOrEmpty(authenticatingAuthorities), EMPTY_HEADER_ERROR_TEMPLATE, SHIB_AUTHENTICATING_AUTHORITY);
     String authenticatingAuthority = authenticatingAuthorities.split(";")[0];
 
-    final ShibbolethPrincipal shibbolethPrincipal = new ShibbolethPrincipal(uid, schacHomeOrganization, displayName, authenticatingAuthority, email);
-    LOG.debug("Assembled Shibboleth principal from headers: {}", shibbolethPrincipal);
-    return shibbolethPrincipal;
+    ShibbolethUser user = new ShibbolethUser(uid, schacHomeOrganization, displayName, authenticatingAuthority, email);
+    LOG.debug("Assembled Shibboleth user from headers: {}", user);
+    return user;
   }
 
   @Override
@@ -53,31 +53,4 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     return "N/A";
   }
 
-  public final static class ShibbolethPrincipal {
-
-    public final String username;
-    public final String schacHomeOrganization;
-    public final String displayName;
-    public final String authenticatingAuthority;
-    public final String email;
-
-    public ShibbolethPrincipal(String username, String schacHomeOrganization, String displayName, String authenticatingAuthority, String email) {
-      this.username = username;
-      this.schacHomeOrganization = schacHomeOrganization;
-      this.displayName = displayName;
-      this.authenticatingAuthority = authenticatingAuthority;
-      this.email = email;
-    }
-
-    @Override
-    public String toString() {
-      return "ShibbolethPrincipal{" +
-        "username='" + username + '\'' +
-        ", schacHomeOrganization='" + schacHomeOrganization + '\'' +
-        ", displayName='" + displayName + '\'' +
-        ", authenticatingAuthority='" + authenticatingAuthority + '\'' +
-        ", email='" + email + '\'' +
-        '}';
-    }
-  }
 }

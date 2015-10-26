@@ -1,12 +1,12 @@
 package authzserver;
 
+import authzserver.shibboleth.ShibbolethUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static authzserver.shibboleth.ShibbolethUserDetailService.ShibbolethUser;
 
 public class SchacHomeAwareUserAuthenticationConverter extends DefaultUserAuthenticationConverter {
 
