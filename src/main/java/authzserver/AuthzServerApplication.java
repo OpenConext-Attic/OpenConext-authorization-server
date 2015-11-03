@@ -51,7 +51,7 @@ public class AuthzServerApplication {
     private DataSource dataSource;
 
     @Autowired
-    private ApprovalStore approvalStore;
+    private ApprovalStoreUserApprovalHandler approvalStoreUserApprovalHandler;
 
     @Value("${oauthServer.accessTokenValiditySeconds}")
     private Integer accessTokenValiditySeconds;
@@ -73,7 +73,7 @@ public class AuthzServerApplication {
 
       endpoints
         .pathMapping("/oauth/confirm_access", "/oauth/confirm")
-        .approvalStore(approvalStore)
+        .userApprovalHandler(approvalStoreUserApprovalHandler)
         .accessTokenConverter(accessTokenConverter)
         .tokenServices(tokenServices())
         .authorizationCodeServices(new JdbcAuthorizationCodeServices(this.dataSource));
@@ -87,6 +87,7 @@ public class AuthzServerApplication {
       final ApprovalStoreUserApprovalHandler userApprovalHandler = new ApprovalStoreUserApprovalHandler();
       userApprovalHandler.setApprovalExpiryInSeconds(approvalExpirySeconds);
       userApprovalHandler.setApprovalStore(approvalStore);
+      userApprovalHandler.setClientDetailsService(clientDetailsService);
 
       DefaultOAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
       userApprovalHandler.setRequestFactory(requestFactory);
