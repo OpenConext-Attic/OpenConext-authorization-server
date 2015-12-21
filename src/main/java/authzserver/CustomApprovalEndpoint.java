@@ -1,6 +1,5 @@
 package authzserver;
 
-import authzserver.shibboleth.ShibbolethUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,7 +37,6 @@ public class CustomApprovalEndpoint {
 
   @RequestMapping("/oauth/confirm")
   public ModelAndView getAccessConfirmation(Map<String, Object> model, HttpServletRequest request, final PreAuthenticatedAuthenticationToken authentication) throws Exception {
-    final ShibbolethUser shibbolethUser = (ShibbolethUser) authentication.getPrincipal();
     final AuthorizationRequest authorizationRequest = (AuthorizationRequest) model.get("authorizationRequest");
     if (environment.acceptsProfiles("dev") && authorizationRequest == null) {
       development(model, request);
@@ -57,8 +55,8 @@ public class CustomApprovalEndpoint {
    */
   private void development(Map<String, Object> model, HttpServletRequest request) {
     LOG.debug("Adding a mock authorization request to the model");
-    model.put("authorizationRequest", new AuthorizationRequest("client_id", Arrays.asList("groups")));
-    Map scopes = new LinkedHashMap<>();
+    model.put("authorizationRequest", new AuthorizationRequest("client_id", Collections.singletonList("groups")));
+    Map<String, Object> scopes = new LinkedHashMap<>();
     scopes.put("scope.groups", false);
     request.setAttribute("scopes", scopes);
   }

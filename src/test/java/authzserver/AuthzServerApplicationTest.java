@@ -3,9 +3,11 @@ package authzserver;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import org.apache.commons.codec.binary.Base64;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -13,12 +15,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import javax.sql.DataSource;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +42,21 @@ public class AuthzServerApplicationTest {
 
   private String callback = "http://localhost:8889/callback";
 
+  @Autowired
+  private DataSource dataSource;
+
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(8889);
+
+  @Before
+  public void before() {
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+    jdbcTemplate.execute("DELETE FROM `oauth_client_details` where `client_id` = 'test_client'");
+    String insertTestClientSql = "INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)" +
+      " VALUES " +
+      "('test_client', NULL, '$2a$10$zIvukHqZA7nfaZTNNP2i/e8tX/TdlwMkQSq9uq7FHZrcRJgPIUFUC', 'read,write', 'client_credentials,authorization_code', NULL, 'ROLE_TOKEN_CHECKER', NULL, NULL, NULL, 'true')";
+    jdbcTemplate.execute(insertTestClientSql);
+  }
 
   @Test
   public void test_skip_confirmation_autoapprove_true() throws InterruptedException {
@@ -85,7 +102,6 @@ public class AuthzServerApplicationTest {
   }
 
   private void addAuthorizationHeaders(HttpHeaders headers) {
-    ///See OpenConext-authorization-server/src/test/resources/db/migration/V3___test_client_details.sql
     String authenticationCredentials = "Basic " + new String(Base64.encodeBase64(new String("test_client" + ":" + "secret").getBytes(Charset.forName("UTF-8"))));
     headers.add("Authorization", authenticationCredentials);
     headers.add("Content-Type", "application/x-www-form-urlencoded");

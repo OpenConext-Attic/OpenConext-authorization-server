@@ -1,24 +1,21 @@
 package authzserver.mock;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
+import authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.filter.GenericFilterBean;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.filter.GenericFilterBean;
-
-import authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 
 public class MockShibbolethFilter extends GenericFilterBean {
 
