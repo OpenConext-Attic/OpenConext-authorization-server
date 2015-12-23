@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/OpenConext/OpenConext-authorization-server.svg)](https://travis-ci.org/OpenConext/OpenConext-authorization-server)
 [![codecov.io](https://codecov.io/github/OpenConext/OpenConext-authorization-server/coverage.svg)](https://codecov.io/github/OpenConext/OpenConext-authorization-server)
 
-Oauth2 server for the OpenConext platform.
+OAuth2 Spring based Authorization server for the OpenConext platform.
 
 # Create database
 
