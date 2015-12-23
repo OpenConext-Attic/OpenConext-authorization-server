@@ -1,0 +1,11 @@
+language: java
+jdk:
+  - oraclejdk8
+services:
+  - mysql
+before_install:
+  - pip install --user codecov
+  - mysql -e "create database IF NOT EXISTS authzserver; grant all on authzserver.* to 'travis';" -uroot
+after_success:
+  - codecov
+

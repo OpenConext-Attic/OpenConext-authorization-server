@@ -1,4 +1,8 @@
 # OpenConext-oauth2-server
+
+[![Build Status](https://travis-ci.org/OpenConext/OpenConext-authorization-server.svg)](https://travis-ci.org/OpenConext/OpenConext-authorization-server)
+[![codecov.io](https://codecov.io/github/OpenConext/OpenConext-authorization-server/coverage.svg)](https://codecov.io/github/OpenConext/OpenConext-authorization-server)
+
 Oauth2 server for the OpenConext platform.
 
 # Create database
@@ -8,9 +12,9 @@ Connect to your local mysql database: `mysql -uroot`
 Execute the following:
 
 ```sql
-CREATE DATABASE `authz-server` DEFAULT CHARACTER SET latin1;
-create user 'authz-serverrw'@'localhost' identified by 'secret';
-grant all on `authz-server`.* to 'authz-serverrw'@'localhost';
+CREATE DATABASE `authzserver` DEFAULT CHARACTER SET latin1;
+create user 'travis'@'localhost';
+grant all on `authzserver`.* to 'travis'@'localhost';
 ```
 
 # Start the app
