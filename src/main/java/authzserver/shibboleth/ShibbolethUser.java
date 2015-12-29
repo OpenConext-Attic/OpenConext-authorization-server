@@ -48,4 +48,16 @@ public class ShibbolethUser extends User {
   public String getEduPersonPrincipalName() {
     return eduPersonPrincipalName;
   }
+
+  @Override
+  public String toString() {
+    return "ShibbolethUser{" +
+      "super=" + super.toString() +
+      "eduPersonPrincipalName='" + eduPersonPrincipalName + '\'' +
+      ", schacHomeOrganization='" + schacHomeOrganization + '\'' +
+      ", displayName='" + displayName + '\'' +
+      ", authenticatingAuthority='" + authenticatingAuthority + '\'' +
+      ", email='" + email + '\'' +
+      '}';
+  }
 }
