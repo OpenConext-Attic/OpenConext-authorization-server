@@ -90,7 +90,9 @@ public class AuthzServerApplicationTest {
     formData.add("token", accessToken);
     Map principal = template.exchange(serverUrl + "/oauth/check_token", HttpMethod.POST, new HttpEntity<>(formData, headers), Map.class).getBody();
     assertEquals("urn:collab:person:example.com:mock-user", principal.get("user_name"));
-
+    assertEquals("admin@example.com", principal.get("email"));
+    assertEquals("admin@example.com", principal.get("eduPersonPrincipalName"));
+    assertEquals("John Doe", principal.get("displayName"));
   }
 
   private MultiValueMap<String, String> getAuthorizationCodeFormParameters(String authorizationCode) {
@@ -113,6 +115,9 @@ public class AuthzServerApplicationTest {
     headers.add("name-id", "urn:collab:person:example.com:mock-user");
     headers.add("Shib-Authenticating-Authority", "my-university");
     headers.add("schachomeorganization", "example.com");
+    headers.add("Shib-InetOrgPerson-mail", "admin@example.com");
+    headers.add("eduPersonPrincipalName", "admin@example.com");
+    headers.add("displayName", "John Doe");
     return headers;
   }
 
