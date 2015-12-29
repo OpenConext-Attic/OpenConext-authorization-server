@@ -23,12 +23,12 @@ public class ShibbolethPreAuthenticatedProcessingFilterTest {
   @Test
   public void testGetPreAuthenticatedPrincipal() throws Exception {
     MockHttpServletRequest request = new MockHttpServletRequest();
-    request.addHeader(COLLAB_PERSON_ID_HEADER_NAME, "urn:collab:person:admin");
-    request.addHeader(SCHAC_HOME_ORGANIZATION_HEADER_NAME, "schac");
+    request.addHeader(SHIB_NAME_ID_HEADER_NAME, "urn:collab:person:admin");
+    request.addHeader(SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME, "schac");
     request.addHeader(SHIB_AUTHENTICATING_AUTHORITY, "http://mock-idp;http://mock-idp");
-    request.addHeader("Shib-InetOrgPerson-mail", "admin@example.com");
-    request.addHeader("eduPersonPrincipalName", "admin@example.com");
-    request.addHeader("displayName", "John Doe");
+    request.addHeader(SHIB_EMAIL, "admin@example.com");
+    request.addHeader(SHIB_EDU_PERSON_PRINCIPAL_NAME, "admin@example.com");
+    request.addHeader(SHIB_DISPLAY_NAME, "John Doe");
 
     ShibbolethUser user = (ShibbolethUser) this.subject.getPreAuthenticatedPrincipal(request);
 
@@ -46,15 +46,15 @@ public class ShibbolethPreAuthenticatedProcessingFilterTest {
   @Test(expected = PreAuthenticatedCredentialsNotFoundException.class)
   public void testGetPreAuthenticatedPrincipalRequiredHeaderSchac() throws Exception {
     MockHttpServletRequest request = new MockHttpServletRequest();
-    request.addHeader(COLLAB_PERSON_ID_HEADER_NAME, "urn:collab:person:admin");
+    request.addHeader(SHIB_NAME_ID_HEADER_NAME, "urn:collab:person:admin");
     this.subject.getPreAuthenticatedPrincipal(request);
   }
 
   @Test(expected = PreAuthenticatedCredentialsNotFoundException.class)
   public void testGetPreAuthenticatedPrincipalRequiredHeaderAuthenticatingAuthority() throws Exception {
     MockHttpServletRequest request = new MockHttpServletRequest();
-    request.addHeader(COLLAB_PERSON_ID_HEADER_NAME, "urn:collab:person:admin");
-    request.addHeader(SCHAC_HOME_ORGANIZATION_HEADER_NAME, "schac");
+    request.addHeader(SHIB_NAME_ID_HEADER_NAME, "urn:collab:person:admin");
+    request.addHeader(SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME, "schac");
     this.subject.getPreAuthenticatedPrincipal(request);
   }
 }

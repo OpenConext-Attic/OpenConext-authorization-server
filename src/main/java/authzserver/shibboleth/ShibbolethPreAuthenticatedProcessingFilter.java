@@ -11,9 +11,12 @@ import javax.servlet.http.HttpServletRequest;
 
 public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-  public static final String COLLAB_PERSON_ID_HEADER_NAME = "name-id";
-  public static final String SCHAC_HOME_ORGANIZATION_HEADER_NAME = "schachomeorganization";
+  public static final String SHIB_NAME_ID_HEADER_NAME = "name-id";
+  public static final String SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME = "schachomeorganization";
   public static final String SHIB_AUTHENTICATING_AUTHORITY = "Shib-Authenticating-Authority";
+  public static final String SHIB_EMAIL = "Shib-InetOrgPerson-mail";
+  public static final String SHIB_DISPLAY_NAME = "displayName";
+  public static final String SHIB_EDU_PERSON_PRINCIPAL_NAME = "eduPersonPrincipalName";
 
   private static final Logger LOG = LoggerFactory.getLogger(ShibbolethPreAuthenticatedProcessingFilter.class);
   private static final String EMPTY_HEADER_ERROR_TEMPLATE = "Header '%s' must be set";
@@ -25,13 +28,13 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
 
   @Override
   protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
-    String uid = request.getHeader(COLLAB_PERSON_ID_HEADER_NAME);
+    String uid = request.getHeader(SHIB_NAME_ID_HEADER_NAME);
     if (StringUtils.isEmpty(uid)) {
-      throw new PreAuthenticatedCredentialsNotFoundException(String.format(EMPTY_HEADER_ERROR_TEMPLATE, COLLAB_PERSON_ID_HEADER_NAME));
+      throw new PreAuthenticatedCredentialsNotFoundException(String.format(EMPTY_HEADER_ERROR_TEMPLATE, SHIB_NAME_ID_HEADER_NAME));
     }
-    String schacHomeOrganization = request.getHeader(SCHAC_HOME_ORGANIZATION_HEADER_NAME);
+    String schacHomeOrganization = request.getHeader(SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME);
     if (StringUtils.isEmpty(schacHomeOrganization)) {
-      throw new PreAuthenticatedCredentialsNotFoundException(String.format(EMPTY_HEADER_ERROR_TEMPLATE, SCHAC_HOME_ORGANIZATION_HEADER_NAME));
+      throw new PreAuthenticatedCredentialsNotFoundException(String.format(EMPTY_HEADER_ERROR_TEMPLATE, SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME));
     }
     String authenticatingAuthorities = request.getHeader(SHIB_AUTHENTICATING_AUTHORITY);
     if (StringUtils.isEmpty(authenticatingAuthorities)) {
@@ -39,7 +42,7 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     }
     String authenticatingAuthority = authenticatingAuthorities.split(";")[0];
 
-    String email = request.getHeader("Shib-InetOrgPerson-mail");
+    String email = request.getHeader(SHIB_EMAIL);
     String displayName = request.getHeader("displayName");
     String eduPersonPrincipalName = request.getHeader("eduPersonPrincipalName");
 

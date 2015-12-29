@@ -27,6 +27,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -112,12 +113,12 @@ public class AuthzServerApplicationTest {
 
   private HttpHeaders getShibHttpHeaders() {
     HttpHeaders headers = new HttpHeaders();
-    headers.add("name-id", "urn:collab:person:example.com:mock-user");
-    headers.add("Shib-Authenticating-Authority", "my-university");
-    headers.add("schachomeorganization", "example.com");
-    headers.add("Shib-InetOrgPerson-mail", "admin@example.com");
-    headers.add("eduPersonPrincipalName", "admin@example.com");
-    headers.add("displayName", "John Doe");
+    headers.add(SHIB_NAME_ID_HEADER_NAME, "urn:collab:person:example.com:mock-user");
+    headers.add(SHIB_AUTHENTICATING_AUTHORITY, "my-university");
+    headers.add(SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME, "example.com");
+    headers.add(SHIB_EMAIL, "admin@example.com");
+    headers.add(SHIB_EDU_PERSON_PRINCIPAL_NAME, "admin@example.com");
+    headers.add(SHIB_DISPLAY_NAME, "John Doe");
     return headers;
   }
 
