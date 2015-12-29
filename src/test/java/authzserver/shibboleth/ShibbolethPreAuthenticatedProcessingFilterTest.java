@@ -26,10 +26,16 @@ public class ShibbolethPreAuthenticatedProcessingFilterTest {
     request.addHeader(COLLAB_PERSON_ID_HEADER_NAME, "urn:collab:person:admin");
     request.addHeader(SCHAC_HOME_ORGANIZATION_HEADER_NAME, "schac");
     request.addHeader(SHIB_AUTHENTICATING_AUTHORITY, "http://mock-idp;http://mock-idp");
+    request.addHeader("Shib-InetOrgPerson-mail", "admin@example.com");
+    request.addHeader("eduPersonPrincipalName", "admin@example.com");
+    request.addHeader("displayName", "John Doe");
 
     ShibbolethUser user = (ShibbolethUser) this.subject.getPreAuthenticatedPrincipal(request);
 
     assertEquals(user.getAuthenticatingAuthority(), "http://mock-idp");
+    assertEquals(user.getEduPersonPrincipalName(), "admin@example.com");
+    assertEquals(user.getEmail(), "admin@example.com");
+    assertEquals(user.getDisplayName(), "John Doe");
   }
 
   @Test(expected = PreAuthenticatedCredentialsNotFoundException.class)

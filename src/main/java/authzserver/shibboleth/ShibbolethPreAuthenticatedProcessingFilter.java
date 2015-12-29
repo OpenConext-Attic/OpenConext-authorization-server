@@ -40,9 +40,10 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
     String authenticatingAuthority = authenticatingAuthorities.split(";")[0];
 
     String email = request.getHeader("Shib-InetOrgPerson-mail");
-    String displayName = request.getHeader("displayname");
+    String displayName = request.getHeader("displayName");
+    String eduPersonPrincipalName = request.getHeader("eduPersonPrincipalName");
 
-    ShibbolethUser user = new ShibbolethUser(uid, schacHomeOrganization, displayName, authenticatingAuthority, email);
+    ShibbolethUser user = new ShibbolethUser(uid, eduPersonPrincipalName, schacHomeOrganization, displayName, authenticatingAuthority, email);
     LOG.debug("Assembled Shibboleth user from headers: {}", user);
     return user;
   }

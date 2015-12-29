@@ -19,6 +19,8 @@ public class SchacHomeAwareUserAuthenticationConverter extends DefaultUserAuthen
     result.put("schacHomeOrganization", shibbolethUser.getSchacHomeOrganization());
     result.put("authenticatingAuthority", shibbolethUser.getAuthenticatingAuthority());
     result.put("email", shibbolethUser.getEmail());
+    result.put("eduPersonPrincipalName", shibbolethUser.getEduPersonPrincipalName());
+    result.put("displayName", shibbolethUser.getDisplayName());
     return result;
   }
 

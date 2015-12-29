@@ -14,13 +14,15 @@ import java.util.Collections;
  */
 public class ShibbolethUser extends User {
 
+  private final String eduPersonPrincipalName;
   private final String schacHomeOrganization;
   private final String displayName;
   private final String authenticatingAuthority;
   private final String email;
 
-  public ShibbolethUser(String username, String schacHomeOrganization, String displayName, String authenticatingAuthority, String email) {
+  public ShibbolethUser(String username, String eduPersonPrincipalName, String schacHomeOrganization, String displayName, String authenticatingAuthority, String email) {
     super(username, "N/A", Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
+    this.eduPersonPrincipalName = eduPersonPrincipalName;
     this.schacHomeOrganization = schacHomeOrganization;
     this.displayName = displayName;
     this.authenticatingAuthority = authenticatingAuthority;
@@ -41,5 +43,9 @@ public class ShibbolethUser extends User {
 
   public String getEmail() {
     return email;
+  }
+
+  public String getEduPersonPrincipalName() {
+    return eduPersonPrincipalName;
   }
 }
