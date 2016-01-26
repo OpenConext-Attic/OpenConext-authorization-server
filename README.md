@@ -13,8 +13,7 @@ Execute the following:
 
 ```sql
 CREATE DATABASE `authzserver` DEFAULT CHARACTER SET latin1;
-create user 'travis'@'localhost';
-grant all on `authzserver`.* to 'travis'@'localhost';
+grant all on `authzserver`.* to 'root'@'localhost';
 ```
 
 # Start the app
