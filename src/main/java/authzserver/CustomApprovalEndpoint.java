@@ -58,6 +58,7 @@ public class CustomApprovalEndpoint {
     model.put("authorizationRequest", new AuthorizationRequest("client_id", Collections.singletonList("groups")));
     Map<String, Object> scopes = new LinkedHashMap<>();
     scopes.put("scope.groups", false);
+    scopes.put("scope.members", false);
     request.setAttribute("scopes", scopes);
   }
 }
