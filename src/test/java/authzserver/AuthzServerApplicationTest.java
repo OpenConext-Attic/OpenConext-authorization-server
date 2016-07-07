@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -49,6 +50,8 @@ public class AuthzServerApplicationTest {
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(8889);
 
+  private RestTemplate restTemplate = new RestTemplate();
+
   @Before
   public void before() {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
@@ -63,13 +66,11 @@ public class AuthzServerApplicationTest {
   public void test_skip_confirmation_autoapprove_true() throws InterruptedException {
     String serverUrl = "http://localhost:" + this.port;
 
-    RestTemplate template = new RestTemplate();
-
     HttpHeaders headers = getShibHttpHeaders();
 
     wireMockRule.stubFor(get(urlMatching("/callback.*")).withQueryParam("code", matching(".*")).willReturn(aResponse().withStatus(200)));
 
-    ResponseEntity<String> response = template.exchange(serverUrl + "/oauth/authorize?response_type=code&client_id=test_client&scope=read&redirect_uri={callback}", HttpMethod.GET, new HttpEntity<>(headers), String.class, callback);
+    ResponseEntity<String> response = restTemplate.exchange(serverUrl + "/oauth/authorize?response_type=code&client_id=test_client&scope=read&redirect_uri={callback}", HttpMethod.GET, new HttpEntity<>(headers), String.class, callback);
     assertEquals(200, response.getStatusCode().value());
 
     List<LoggedRequest> requests = findAll(getRequestedFor(urlMatching("/callback.*")));
@@ -81,7 +82,7 @@ public class AuthzServerApplicationTest {
 
     MultiValueMap<String, String> bodyMap = getAuthorizationCodeFormParameters(authorizationCode);
 
-    Map body = template.exchange(serverUrl + "/oauth/token", HttpMethod.POST, new HttpEntity<>(bodyMap, headers), Map.class).getBody();
+    Map body = restTemplate.exchange(serverUrl + "/oauth/token", HttpMethod.POST, new HttpEntity<>(bodyMap, headers), Map.class).getBody();
     assertEquals("bearer", body.get("token_type"));
     String accessToken = (String) body.get("access_token");
     assertNotNull(accessToken);
@@ -89,11 +90,26 @@ public class AuthzServerApplicationTest {
     // Now for the completeness of the scenario retrieve the Principal (e.g. impersonating a Resource Server) using the accessCode
     MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
     formData.add("token", accessToken);
-    Map principal = template.exchange(serverUrl + "/oauth/check_token", HttpMethod.POST, new HttpEntity<>(formData, headers), Map.class).getBody();
+    Map principal = restTemplate.exchange(serverUrl + "/oauth/check_token", HttpMethod.POST, new HttpEntity<>(formData, headers), Map.class).getBody();
     assertEquals("urn:collab:person:example.com:mock-user", principal.get("user_name"));
     assertEquals("admin@example.com", principal.get("email"));
     assertEquals("admin@example.com", principal.get("eduPersonPrincipalName"));
     assertEquals("John Doe", principal.get("displayName"));
+  }
+
+  @Test
+  public void testErrorPage() {
+    RestTemplate testRestTemplate = new TestRestTemplate();
+
+    String url = "http://localhost:" + this.port + "/bogus";
+    Map map = testRestTemplate.getForObject(url, Map.class);
+
+    assertEquals(500, map.get("status"));
+
+    HttpHeaders headers = getShibHttpHeaders();
+    ResponseEntity<Map> response = testRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+
+    assertEquals(404, response.getBody().get("status"));
   }
 
   private MultiValueMap<String, String> getAuthorizationCodeFormParameters(String authorizationCode) {

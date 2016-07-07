@@ -34,6 +34,7 @@ public class ShibbolethSecurityConfig extends WebSecurityConfigurerAdapter {
     web.
       ignoring()
       .antMatchers("/static/**")
+      .antMatchers("/info")
       .antMatchers("/health");
   }
 
