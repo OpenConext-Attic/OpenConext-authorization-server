@@ -25,6 +25,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +62,7 @@ public class AuthzServerApplicationTest {
     jdbcTemplate.execute("DELETE FROM `oauth_client_details` where `client_id` = 'test_client' or `client_id` = 'test_resource_server'");
     String insertTestClientSql = "INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)" +
       " VALUES " +
-      "('test_client', NULL, '$2a$10$zIvukHqZA7nfaZTNNP2i/e8tX/TdlwMkQSq9uq7FHZrcRJgPIUFUC', 'read,write', 'client_credentials,authorization_code', NULL, 'ROLE_TOKEN_CHECKER', NULL, NULL, NULL, 'true')";
+      "('test_client', 'groups,whatever', '$2a$10$zIvukHqZA7nfaZTNNP2i/e8tX/TdlwMkQSq9uq7FHZrcRJgPIUFUC', 'read,write', 'client_credentials,authorization_code', NULL, 'ROLE_TOKEN_CHECKER', NULL, NULL, NULL, 'true')";
     String insertTestResourceServerSql = "INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)" +
       " VALUES " +
       "('test_resource_server', NULL, '$2a$10$zIvukHqZA7nfaZTNNP2i/e8tX/TdlwMkQSq9uq7FHZrcRJgPIUFUC', 'read,write', 'none', NULL, 'ROLE_TOKEN_CHECKER', NULL, NULL, NULL, 'true')";
@@ -101,6 +103,8 @@ public class AuthzServerApplicationTest {
     assertEquals("admin@example.com", principal.get("email"));
     assertEquals("admin@example.com", principal.get("eduPersonPrincipalName"));
     assertEquals("John Doe", principal.get("displayName"));
+    //resourceIds
+    assertEquals(Arrays.asList("groups", "whatever" ), principal.get("aud"));
   }
 
   @Test
