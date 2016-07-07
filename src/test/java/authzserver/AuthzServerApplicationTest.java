@@ -30,8 +30,7 @@ import java.util.Map;
 
 import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = AuthzServerApplication.class)
@@ -50,16 +49,23 @@ public class AuthzServerApplicationTest {
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(8889);
 
+  // we need both flavours for following redirect and looking into non-200 return codes
   private RestTemplate restTemplate = new RestTemplate();
+  private RestTemplate testRestTemplate = new TestRestTemplate();
+
 
   @Before
   public void before() {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-    jdbcTemplate.execute("DELETE FROM `oauth_client_details` where `client_id` = 'test_client'");
+    jdbcTemplate.execute("DELETE FROM `oauth_client_details` where `client_id` = 'test_client' or `client_id` = 'test_resource_server'");
     String insertTestClientSql = "INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)" +
       " VALUES " +
       "('test_client', NULL, '$2a$10$zIvukHqZA7nfaZTNNP2i/e8tX/TdlwMkQSq9uq7FHZrcRJgPIUFUC', 'read,write', 'client_credentials,authorization_code', NULL, 'ROLE_TOKEN_CHECKER', NULL, NULL, NULL, 'true')";
+    String insertTestResourceServerSql = "INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)" +
+      " VALUES " +
+      "('test_resource_server', NULL, '$2a$10$zIvukHqZA7nfaZTNNP2i/e8tX/TdlwMkQSq9uq7FHZrcRJgPIUFUC', 'read,write', 'none', NULL, 'ROLE_TOKEN_CHECKER', NULL, NULL, NULL, 'true')";
     jdbcTemplate.execute(insertTestClientSql);
+    jdbcTemplate.execute(insertTestResourceServerSql);
   }
 
   @Test
@@ -99,8 +105,6 @@ public class AuthzServerApplicationTest {
 
   @Test
   public void testErrorPage() {
-    RestTemplate testRestTemplate = new TestRestTemplate();
-
     String url = "http://localhost:" + this.port + "/bogus";
     Map map = testRestTemplate.getForObject(url, Map.class);
 
@@ -110,6 +114,18 @@ public class AuthzServerApplicationTest {
     ResponseEntity<Map> response = testRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
 
     assertEquals(404, response.getBody().get("status"));
+  }
+
+  @Test
+  public void testOpenRedirectResourceServer() throws Exception {
+    HttpHeaders headers = getShibHttpHeaders();
+    String serverUrl = "http://localhost:" + this.port + "/oauth/authorize?response_type=code&client_id=test_resource_server&scope=read&redirect_uri=https://google.com";
+
+    ResponseEntity<String> response = testRestTemplate.exchange(serverUrl, HttpMethod.GET, new HttpEntity<>(headers), String.class, callback);
+    assertEquals(400, response.getStatusCode().value());
+    String body = response.getBody();
+
+    assertTrue(body.contains("A redirect_uri can only be used by implicit or authorization_code grant types"));
   }
 
   private MultiValueMap<String, String> getAuthorizationCodeFormParameters(String authorizationCode) {
