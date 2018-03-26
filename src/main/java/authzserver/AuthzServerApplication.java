@@ -101,9 +101,10 @@ public class AuthzServerApplication {
       return new JdbcApprovalStore(dataSource);
     }
 
+
     @Bean
     public JdbcTokenStore tokenStore() {
-      return new JdbcTokenStore(dataSource);
+      return new ConcurrentJdbcTokenStore(dataSource);
     }
 
     private DefaultTokenServices tokenServices() {
