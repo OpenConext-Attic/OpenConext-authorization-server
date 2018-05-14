@@ -3,72 +3,46 @@ package authzserver;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import org.apache.commons.codec.binary.Base64;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.sql.DataSource;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.junit.Assert.*;
+import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.SHIB_AUTHENTICATING_AUTHORITY;
+import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.SHIB_DISPLAY_NAME;
+import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.SHIB_EDU_PERSON_PRINCIPAL_NAME;
+import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.SHIB_EMAIL;
+import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter.SHIB_NAME_ID_HEADER_NAME;
+import static authzserver.shibboleth.ShibbolethPreAuthenticatedProcessingFilter
+  .SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = AuthzServerApplication.class)
-@WebAppConfiguration
-@IntegrationTest("server.port:0")
-public class AuthzServerApplicationTest {
-
-  @Value("${local.server.port}")
-  private int port;
+public class AuthzServerApplicationTest extends AbstractIntegrationTest{
 
   private String callback = "http://localhost:8889/callback";
 
-  @Autowired
-  private DataSource dataSource;
-
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(8889);
-
-  // we need both flavours for following redirect and looking into non-200 return codes
-  private RestTemplate restTemplate = new RestTemplate();
-  private RestTemplate testRestTemplate = new TestRestTemplate();
-
-
-  @Before
-  public void before() {
-    JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-    jdbcTemplate.execute("DELETE FROM `oauth_client_details` where `client_id` = 'test_client' or `client_id` = 'test_resource_server'");
-    String insertTestClientSql = "INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)" +
-      " VALUES " +
-      "('test_client', 'groups,whatever', '$2a$10$zIvukHqZA7nfaZTNNP2i/e8tX/TdlwMkQSq9uq7FHZrcRJgPIUFUC', 'read,write', 'client_credentials,authorization_code', NULL, 'ROLE_TOKEN_CHECKER', NULL, NULL, NULL, 'true')";
-    String insertTestResourceServerSql = "INSERT INTO `oauth_client_details` (`client_id`, `resource_ids`, `client_secret`, `scope`, `authorized_grant_types`, `web_server_redirect_uri`, `authorities`, `access_token_validity`, `refresh_token_validity`, `additional_information`, `autoapprove`)" +
-      " VALUES " +
-      "('test_resource_server', NULL, '$2a$10$zIvukHqZA7nfaZTNNP2i/e8tX/TdlwMkQSq9uq7FHZrcRJgPIUFUC', 'read,write', 'none', NULL, 'ROLE_TOKEN_CHECKER', NULL, NULL, NULL, 'true')";
-    jdbcTemplate.execute(insertTestClientSql);
-    jdbcTemplate.execute(insertTestResourceServerSql);
-  }
 
   @Test
   public void test_skip_confirmation_autoapprove_true() throws InterruptedException {
@@ -78,7 +52,8 @@ public class AuthzServerApplicationTest {
 
     wireMockRule.stubFor(get(urlMatching("/callback.*")).withQueryParam("code", matching(".*")).willReturn(aResponse().withStatus(200)));
 
-    ResponseEntity<String> response = restTemplate.exchange(serverUrl + "/oauth/authorize?response_type=code&client_id=test_client&scope=read&redirect_uri={callback}", HttpMethod.GET, new HttpEntity<>(headers), String.class, callback);
+    ResponseEntity<String> response = restTemplate.exchange(serverUrl + "/oauth/authorize?response_type=code&client_id=test_client&scope=read&redirect_uri={callback}",
+      HttpMethod.GET, new HttpEntity<>(headers), String.class, Collections.singletonMap("callback", callback));
     assertEquals(200, response.getStatusCode().value());
 
     List<LoggedRequest> requests = findAll(getRequestedFor(urlMatching("/callback.*")));

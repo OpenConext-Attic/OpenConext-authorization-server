@@ -8,7 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.MetricFilterAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.TraceWebFilterAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -135,7 +135,7 @@ public class AuthzServerApplication {
   }
 
   @Bean
-  public FilterRegistrationBean corsFilter() {
+  public FilterRegistrationBean lenientCorsFilter() {
     FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
     filterRegistrationBean.setFilter(new CorsFilter());
     return filterRegistrationBean;

@@ -17,7 +17,7 @@ public class CorsFilterTest {
 
   private CorsFilter subject = new CorsFilter();
   private MockHttpServletRequest req;
-  private HttpServletResponse res;
+  private MockHttpServletResponse res;
   private FilterChain chain;
 
 
