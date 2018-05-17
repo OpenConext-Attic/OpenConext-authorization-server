@@ -100,6 +100,11 @@ curl -u cool_app_id:secret "http://localhost:8080/oauth/check_token?token=$token
   "client_id": "cool_app_id"
 }
 ```
+And to get a refresh_token after the access_token is expired:
+```
+export refresh_token=f463adcd-48cd-4d60-a19c-1a0d2b382598
+curl -X POST -u cool_app_id:secret -d "refresh_token=$refresh_token&grant_type=refresh_token" http://localhost:8080/oauth/token | jq
+```
 
 You can also obtain a client-credentials token where no user is involved. It is used in Server-to-Server communication.
 ```
