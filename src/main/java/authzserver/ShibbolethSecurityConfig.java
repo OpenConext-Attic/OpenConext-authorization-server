@@ -42,7 +42,7 @@ public class ShibbolethSecurityConfig extends WebSecurityConfigurerAdapter {
       http
         .antMatcher("/deprovision/**")
         .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.NEVER)
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .csrf()
         .disable()

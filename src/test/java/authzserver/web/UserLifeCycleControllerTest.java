@@ -8,9 +8,11 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.junit.Assert.assertEquals;
 
 
@@ -25,30 +27,24 @@ public class UserLifeCycleControllerTest extends AbstractIntegrationTest {
       .when()
       .get("deprovision/{user}", "urn:collab:person:example.com:mock-user")
       .as(LifeCycleResult.class);
-    LifeCycleResult expected = getExpectedLifeCycleResult();
 
-    assertEquals(expected, result);
+    assertLifeCycleResult(result);
   }
 
   @Test
   public void dryRun() {
     LifeCycleResult result = doDeprovision(true);
-    LifeCycleResult expected = getExpectedLifeCycleResult();
 
-    assertEquals(expected, result);
+    assertLifeCycleResult(result);
   }
 
   @Test
   public void deprovision() {
     LifeCycleResult result = doDeprovision(false);
-    LifeCycleResult expected = getExpectedLifeCycleResult();
 
-    assertEquals(expected, result);
-
+    assertLifeCycleResult(result);
     result = doDeprovision(false);
-    expected = new LifeCycleResult();
-
-    assertEquals(expected, result);
+    assertEquals(0, result.getData().size());
   }
 
   private LifeCycleResult doDeprovision(boolean dryRun) {
@@ -61,21 +57,17 @@ public class UserLifeCycleControllerTest extends AbstractIntegrationTest {
       .as(LifeCycleResult.class);
   }
 
-  private LifeCycleResult getExpectedLifeCycleResult() {
-    LifeCycleResult expected = new LifeCycleResult();
 
-    List<Attribute> attributes = Arrays.asList(
-      new Attribute("approval", "test_client_read_APPROVED"),
-      new Attribute("authenticating_authority", "my-university"),
-      new Attribute("edu_person_principal_name", "admin@example.com"),
-      new Attribute("display_name", "John Doe"),
-      new Attribute("schac_home_organisation", "example.com"),
-      new Attribute("email", "admin@example.com"),
-      new Attribute("user_name", "urn:collab:person:example.com:mock-user"))
-      .stream()
-      .sorted(Comparator.comparing(Attribute::getName))
-      .collect(toList());
-    expected.setData(attributes);
-    return expected;
+  private void assertLifeCycleResult(LifeCycleResult result) {
+    Map<String, String> map = result.getData().stream().collect(toMap(attr -> attr.getName(), attr -> attr.getValue()));
+    assertEquals(7 ,map.size());
+    assertEquals(map.get("approval"), "test_client_read_APPROVED");
+    assertEquals(map.get("authenticating_authority"), "my-university");
+    assertEquals(map.get("edu_person_principal_name"), "admin@example.com");
+    assertEquals(map.get("display_name"), "John Doe");
+    assertEquals(map.get("schac_home_organisation"), "example.com");
+    assertEquals(map.get("email"), "admin@example.com");
+    assertEquals(map.get("user_name"), "urn:collab:person:example.com:mock-user");
   }
+
 }

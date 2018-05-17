@@ -30,6 +30,7 @@ import static java.util.Collections.singletonMap;
 
 @RestController
 public class UserLifeCycleController {
+
   private static final Logger LOG = LoggerFactory.getLogger(UserLifeCycleController.class);
 
   private NamedParameterJdbcTemplate jdbcTemplate;

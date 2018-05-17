@@ -1,8 +1,6 @@
 package authzserver.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -10,7 +8,6 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-@EqualsAndHashCode
 public class LifeCycleResult {
 
   private String status = "OK";

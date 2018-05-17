@@ -101,6 +101,11 @@ curl -u cool_app_id:secret "http://localhost:8080/oauth/check_token?token=$token
 }
 ```
 
+You can also obtain a client-credentials token where no user is involved. It is used in Server-to-Server communication.
+```
+curl -u cool_app_id:secret -H 'Content-Type: application/x-www-form-urlencoded' -X POST -d 'grant_type=client_credentials' http://localhost:8080/oauth/token | jq
+```
+
 ## LifeCycle Deprovisioning
 
 Authz-Server has a LifeCycle API to deprovision users. The preview endpoint:
