@@ -59,12 +59,6 @@ public class AuthzServerApplication {
     @Value("${oauthServer.refreshTokenValiditySeconds}")
     private Integer refreshTokenValiditySeconds;
 
-    @Autowired
-    private JdbcTokenStore tokenStore;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
       throws Exception {
@@ -101,14 +95,14 @@ public class AuthzServerApplication {
 
 
     @Bean
-    public JdbcTokenStore tokenStore() {
+    public ConcurrentJdbcTokenStore tokenStore() {
       return new ConcurrentJdbcTokenStore(dataSource);
     }
 
     private DefaultTokenServices tokenServices() {
       final DefaultTokenServices tokenServices = new DefaultTokenServices();
       tokenServices.setSupportRefreshToken(true);
-      tokenServices.setTokenStore(tokenStore);
+      tokenServices.setTokenStore(tokenStore());
       tokenServices.setAccessTokenValiditySeconds(accessTokenValiditySeconds);
       tokenServices.setRefreshTokenValiditySeconds(refreshTokenValiditySeconds);
       return tokenServices;
@@ -118,7 +112,7 @@ public class AuthzServerApplication {
     public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
       oauthServer
         .checkTokenAccess("hasAuthority('" + ROLE_TOKEN_CHECKER + "')")
-        .passwordEncoder(passwordEncoder);
+        .passwordEncoder(passwordEncoder());
     }
 
     @Bean
