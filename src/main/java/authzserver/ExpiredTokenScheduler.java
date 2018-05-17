@@ -60,9 +60,9 @@ public class ExpiredTokenScheduler {
       -> token.isExpired()).collect(Collectors.toList());
     tokens.forEach(token -> {
       this.tokenStore.removeAccessToken(token);
-      LOG.info("Deleted access token {} because it was expired", token.getValue());
+      LOG.info("Removed access token {} because it was expired", token.getValue());
     });
-    LOG.info("Deleted {} access tokens because they were expired", tokens.size());
+    LOG.info("Removed {} access tokens because they were expired", tokens.size());
     return tokens.size();
   }
 
@@ -72,9 +72,9 @@ public class ExpiredTokenScheduler {
       .collect(Collectors.toList());
       tokens.forEach(token -> {
         this.tokenStore.removeRefreshToken(token);
-        LOG.info("Deleted refresh token {} because it was expired", token.getValue());
+        LOG.info("Removed refresh token {} because it was expired", token.getValue());
       });
-    LOG.info("Deleted {} refresh tokens because they were expired", tokens.size());
+    LOG.info("Removed {} refresh tokens because they were expired", tokens.size());
     return tokens.size();
   }
 
