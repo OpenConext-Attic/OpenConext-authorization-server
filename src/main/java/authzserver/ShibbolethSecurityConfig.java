@@ -90,8 +90,8 @@ public class ShibbolethSecurityConfig extends WebSecurityConfigurerAdapter {
       }
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    @Autowired
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
       LOG.info("Configuring AuthenticationManager with a PreAuthenticatedAuthenticationProvider");
       PreAuthenticatedAuthenticationProvider authenticationProvider = new PreAuthenticatedAuthenticationProvider();
       authenticationProvider.setPreAuthenticatedUserDetailsService(new ShibbolethUserDetailService());
