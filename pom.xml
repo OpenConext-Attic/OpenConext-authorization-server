@@ -23,7 +23,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <start-class>authzserver.AuthzServerApplication</start-class>
     <java.version>1.8</java.version>
-    <spring-security-oauth2.version>2.3.3.RELEASE</spring-security-oauth2.version>
+    <spring-security-oauth2.version>2.3.4.RELEASE</spring-security-oauth2.version>
     <flyway.version>3.2.1</flyway.version>
   </properties>
   <dependencies>
