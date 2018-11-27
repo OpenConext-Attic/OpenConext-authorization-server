@@ -8,6 +8,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedC
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 
 public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
@@ -28,23 +29,23 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
 
   @Override
   protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
-    String uid = request.getHeader(SHIB_NAME_ID_HEADER_NAME);
+    String uid = getHeader(SHIB_NAME_ID_HEADER_NAME, request);
     if (StringUtils.isEmpty(uid)) {
       throw new PreAuthenticatedCredentialsNotFoundException(String.format(EMPTY_HEADER_ERROR_TEMPLATE, SHIB_NAME_ID_HEADER_NAME));
     }
-    String schacHomeOrganization = request.getHeader(SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME);
+    String schacHomeOrganization = getHeader(SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME, request);
     if (StringUtils.isEmpty(schacHomeOrganization)) {
       throw new PreAuthenticatedCredentialsNotFoundException(String.format(EMPTY_HEADER_ERROR_TEMPLATE, SHIB_SCHAC_HOME_ORGANIZATION_HEADER_NAME));
     }
-    String authenticatingAuthorities = request.getHeader(SHIB_AUTHENTICATING_AUTHORITY);
+    String authenticatingAuthorities = getHeader(SHIB_AUTHENTICATING_AUTHORITY, request);
     if (StringUtils.isEmpty(authenticatingAuthorities)) {
       throw new PreAuthenticatedCredentialsNotFoundException(String.format(EMPTY_HEADER_ERROR_TEMPLATE, SHIB_AUTHENTICATING_AUTHORITY));
     }
     String authenticatingAuthority = authenticatingAuthorities.split(";")[0];
 
-    String email = request.getHeader(SHIB_EMAIL);
-    String displayName = request.getHeader("displayName");
-    String eduPersonPrincipalName = request.getHeader("eduPersonPrincipalName");
+    String email = getHeader(SHIB_EMAIL, request);
+    String displayName = getHeader("displayName", request);
+    String eduPersonPrincipalName = getHeader("eduPersonPrincipalName", request);
 
     ShibbolethUser user = new ShibbolethUser(uid, eduPersonPrincipalName, schacHomeOrganization, displayName, authenticatingAuthority, email);
     LOG.debug("Assembled Shibboleth user from headers: {}", user);
@@ -55,5 +56,16 @@ public class ShibbolethPreAuthenticatedProcessingFilter extends AbstractPreAuthe
   protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
     return "N/A";
   }
+
+  private String getHeader(String name, HttpServletRequest request) {
+    String header = request.getHeader(name);
+    try {
+      return StringUtils.hasText(header) ?
+        new String(header.getBytes("ISO8859-1"), "UTF-8") : header;
+    } catch (UnsupportedEncodingException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+
 
 }
