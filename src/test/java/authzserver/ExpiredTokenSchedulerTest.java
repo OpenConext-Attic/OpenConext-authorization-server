@@ -54,7 +54,7 @@ public class ExpiredTokenSchedulerTest extends AbstractIntegrationTest {
     
     ExpiredTokenScheduler scheduler = new ExpiredTokenScheduler(true, tokenStore);
     Map<String, ?> scheduled = scheduler.scheduled();
-    assertEquals(1, scheduled.get("oauth_access_token"));
+    assertEquals(2, scheduled.get("oauth_access_token"));
     assertEquals(1, scheduled.get("oauth_refresh_token"));
     assertEquals(1, scheduled.get("oauth_code"));
     assertEquals(1, scheduled.get("oauth_approvals"));
