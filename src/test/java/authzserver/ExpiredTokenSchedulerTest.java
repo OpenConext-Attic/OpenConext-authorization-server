@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
 import java.util.Calendar;
-import java.util.Map;
+import java.util.Collections;
 
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.EMPTY_MAP;
@@ -50,14 +50,32 @@ public class ExpiredTokenSchedulerTest extends AbstractIntegrationTest {
       "('user', 'client', 'read', 'APPROVED', '2016-05-09 14:21:31', '2018-05-14 14:21:31')", EMPTY_MAP);
     tokenStore.getJdbcTemplate().update("INSERT INTO oauth_code " +
       "(code, authentication, created) VALUES ('code', '', '2016-05-17 14:50:24')", EMPTY_MAP);
-    
-    
-    ExpiredTokenScheduler scheduler = new ExpiredTokenScheduler(true, tokenStore);
-    Map<String, ?> scheduled = scheduler.scheduled();
-    assertEquals(2, scheduled.get("oauth_access_token"));
-    assertEquals(1, scheduled.get("oauth_refresh_token"));
-    assertEquals(1, scheduled.get("oauth_code"));
-    assertEquals(1, scheduled.get("oauth_approvals"));
 
+    assertEquals(2, countForObject("oauth_access_token"));
+    assertEquals(2, countForObject("oauth_refresh_token"));
+    assertEquals(2, countForObject("oauth_approvals"));
+    assertEquals(1, countForObject("oauth_code"));
+
+    ExpiredTokenScheduler scheduler = new ExpiredTokenScheduler(false, tokenStore);
+    scheduler.scheduled();
+
+    assertEquals(2, countForObject("oauth_access_token"));
+    assertEquals(2, countForObject("oauth_refresh_token"));
+    assertEquals(2, countForObject("oauth_approvals"));
+    assertEquals(1, countForObject("oauth_code"));
+
+    scheduler = new ExpiredTokenScheduler(true, tokenStore);
+    scheduler.scheduled();
+
+    assertEquals(0, countForObject("oauth_access_token"));
+    assertEquals(0, countForObject("oauth_refresh_token"));
+    assertEquals(0, countForObject("oauth_code"));
+    assertEquals(0, countForObject("oauth_approvals"));
+
+  }
+
+  private int countForObject(String tableName) {
+    return tokenStore.getJdbcTemplate().queryForObject(
+      String.format("select count(*) from %s", tableName), Collections.emptyMap(), Integer.class).intValue();
   }
 }

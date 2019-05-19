@@ -36,22 +36,18 @@ public class ExpiredTokenScheduler {
   }
 
   @Scheduled(cron = "${cron.expression}")
-  public Map<String, ?> scheduled() {
+  public void scheduled() {
     if (nodeCronJobResponsible) {
-      Map<String, Integer> result = new HashMap<>();
       try {
-        result.put("oauth_access_token", this.removeExpiredAccessTokens());
-        result.put("oauth_refresh_token", this.removeExpiredRefreshTokens());
-        result.put("oauth_code", this.removeExpiredAuthorizationCodes());
-        result.put("oauth_approvals", this.removeExpiredApprovals());
-        return result;
+        this.removeExpiredAccessTokens();
+        this.removeExpiredRefreshTokens();
+        this.removeExpiredAuthorizationCodes();
+        this.removeExpiredApprovals();
       } catch (Throwable t) { //NOSONAR
         //deliberate swallowing because otherwise the scheduler stops
         LOG.error("Unexpected exception in removing expired tokens", t);
-        return Collections.singletonMap("error", t);
       }
     }
-    return null;
   }
 
   private int removeExpiredAccessTokens() {
