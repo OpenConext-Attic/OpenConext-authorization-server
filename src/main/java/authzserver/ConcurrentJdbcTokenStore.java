@@ -46,6 +46,16 @@ public class ConcurrentJdbcTokenStore extends JdbcTokenStore {
     }
   }
 
+  @Override
+  public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
+    try {
+      return super.getAccessToken(authentication);
+    } catch (Exception e) {
+      //There is a race condition for client_credential token request. Ignore and create a new access_token
+      return null;
+    }
+  }
+
   List<OAuth2AccessToken> allOAuth2AccessTokens() {
     return jdbcTemplate.query("select token from oauth_access_token",
       (rs, rowNum) -> deserializeAccessToken(rs.getBytes(1)));
