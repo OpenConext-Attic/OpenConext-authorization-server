@@ -20,9 +20,20 @@ import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class TokenEndpointTest extends AbstractIntegrationTest {
+
+  @Test
+  public void sequentialFlow() {
+    HttpEntity<MultiValueMap<String, String>> request = getRequest();
+    Object accessToken = restTemplate.postForEntity("http://localhost:" + this.port + "/oauth/token", request, Map.class).getBody().get("access_token");
+    assertNotNull(accessToken);
+
+    accessToken = restTemplate.postForEntity("http://localhost:" + this.port + "/oauth/token", request, Map.class).getBody().get("access_token");
+    assertNotNull(accessToken);
+  }
 
   @Test
   public void concurrentClientCredentials() throws InterruptedException {
