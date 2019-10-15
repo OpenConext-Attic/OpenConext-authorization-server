@@ -9,9 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.token.TokenService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.client.test.BeforeOAuth2Context;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -26,6 +24,7 @@ import org.springframework.security.oauth2.provider.request.DefaultOAuth2Request
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
@@ -37,130 +36,136 @@ import java.util.Locale;
 @SpringBootApplication(exclude = {TraceWebFilterAutoConfiguration.class, MetricFilterAutoConfiguration.class})
 public class AuthzServerApplication {
 
-    public static final String ROLE_TOKEN_CHECKER = "ROLE_TOKEN_CHECKER";
+  public static final String ROLE_TOKEN_CHECKER = "ROLE_TOKEN_CHECKER";
 
-    public static void main(String[] args) {
-        SpringApplication.run(AuthzServerApplication.class, args);
+  public static void main(String[] args) {
+    SpringApplication.run(AuthzServerApplication.class, args);
+  }
+
+  @Bean
+  public FilterRegistrationBean lenientCorsFilter() {
+    FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+    filterRegistrationBean.setFilter(new CorsFilter());
+    return filterRegistrationBean;
+  }
+
+  @Bean
+  public LocaleResolver localeResolver() {
+    CookieLocaleResolver slr = new CookieLocaleResolver();
+    slr.setDefaultLocale(Locale.ENGLISH);
+    return slr;
+  }
+
+  @Bean
+  public LocaleChangeInterceptor localeChangeInterceptor() {
+    LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
+    lci.setParamName("lang");
+    return lci;
+  }
+
+  @Bean
+  public WebMvcConfigurerAdapter adapter() {
+    return new WebMvcConfigurerAdapter() {
+      @Override
+      public void addInterceptors(InterceptorRegistry registry) {
+        super.addInterceptors(registry);
+        registry.addInterceptor(localeChangeInterceptor());
+      }
+
+      @Override
+      public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        super.configureContentNegotiation(configurer);
+        configurer.favorParameter(false).favorPathExtension(false);
+      }
+    };
+  }
+
+  @Configuration
+  @EnableAuthorizationServer
+  protected static class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Autowired
+    private ApprovalStoreUserApprovalHandler approvalStoreUserApprovalHandler;
+
+    @Autowired
+    private ClientDetailsService clientDetailsService;
+
+    @Value("${oauthServer.accessTokenValiditySeconds}")
+    private Integer accessTokenValiditySeconds;
+
+    @Value("${oauthServer.refreshTokenValiditySeconds}")
+    private Integer refreshTokenValiditySeconds;
+
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints)
+      throws Exception {
+      final DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+      accessTokenConverter.setUserTokenConverter(new SchacHomeAwareUserAuthenticationConverter());
+
+      endpoints
+        .pathMapping("/oauth/confirm_access", "/oauth/confirm")
+        .userApprovalHandler(approvalStoreUserApprovalHandler)
+        .accessTokenConverter(accessTokenConverter)
+        .tokenServices(tokenServices())
+        .authorizationCodeServices(new JdbcAuthorizationCodeServices(this.dataSource));
     }
 
     @Bean
-    public FilterRegistrationBean lenientCorsFilter() {
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        filterRegistrationBean.setFilter(new CorsFilter());
-        return filterRegistrationBean;
+    @Autowired
+    public ApprovalStoreUserApprovalHandler approvalStoreUserApprovalHandler(
+      @Value("${oauthServer.approvalExpirySeconds}") Integer approvalExpirySeconds,
+      ApprovalStore approvalStore,
+      ClientDetailsService clientDetailsService) {
+      final ApprovalStoreUserApprovalHandler userApprovalHandler = new ApprovalStoreUserApprovalHandler();
+      userApprovalHandler.setApprovalExpiryInSeconds(approvalExpirySeconds);
+      userApprovalHandler.setApprovalStore(approvalStore);
+      userApprovalHandler.setClientDetailsService(clientDetailsService);
+
+      DefaultOAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
+      userApprovalHandler.setRequestFactory(requestFactory);
+      return userApprovalHandler;
     }
 
     @Bean
-    public LocaleResolver localeResolver() {
-        CookieLocaleResolver slr = new CookieLocaleResolver();
-        slr.setDefaultLocale(Locale.ENGLISH);
-        return slr;
+    public ApprovalStore approvalStore() {
+      return new JdbcApprovalStore(dataSource);
+    }
+
+    private DefaultTokenServices tokenServices() {
+      final DefaultTokenServices tokenServices = new DefaultTokenServices();
+      tokenServices.setSupportRefreshToken(true);
+      tokenServices.setTokenStore(tokenStore());
+      tokenServices.setClientDetailsService(clientDetailsService);
+      tokenServices.setAccessTokenValiditySeconds(accessTokenValiditySeconds);
+      tokenServices.setRefreshTokenValiditySeconds(refreshTokenValiditySeconds);
+      return tokenServices;
     }
 
     @Bean
-    public LocaleChangeInterceptor localeChangeInterceptor() {
-        LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
-        lci.setParamName("lang");
-        return lci;
+    public ConcurrentJdbcTokenStore tokenStore() {
+      return new ConcurrentJdbcTokenStore(dataSource);
+    }
+
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
+      oauthServer
+        .checkTokenAccess("hasAuthority('" + ROLE_TOKEN_CHECKER + "')")
+        .passwordEncoder(passwordEncoder());
     }
 
     @Bean
-    public WebMvcConfigurerAdapter adapter() {
-        return new WebMvcConfigurerAdapter() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                super.addInterceptors(registry);
-                registry.addInterceptor(localeChangeInterceptor());
-            }
-        };
+    public BCryptPasswordEncoder passwordEncoder() {
+      return new BCryptPasswordEncoder();
     }
 
-    @Configuration
-    @EnableAuthorizationServer
-    protected static class Oauth2ServerConfig extends AuthorizationServerConfigurerAdapter {
-
-        @Autowired
-        private DataSource dataSource;
-
-        @Autowired
-        private ApprovalStoreUserApprovalHandler approvalStoreUserApprovalHandler;
-
-        @Autowired
-        private ClientDetailsService clientDetailsService;
-
-        @Value("${oauthServer.accessTokenValiditySeconds}")
-        private Integer accessTokenValiditySeconds;
-
-        @Value("${oauthServer.refreshTokenValiditySeconds}")
-        private Integer refreshTokenValiditySeconds;
-
-        @Override
-        public void configure(AuthorizationServerEndpointsConfigurer endpoints)
-            throws Exception {
-            final DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
-            accessTokenConverter.setUserTokenConverter(new SchacHomeAwareUserAuthenticationConverter());
-
-            endpoints
-                .pathMapping("/oauth/confirm_access", "/oauth/confirm")
-                .userApprovalHandler(approvalStoreUserApprovalHandler)
-                .accessTokenConverter(accessTokenConverter)
-                .tokenServices(tokenServices())
-                .authorizationCodeServices(new JdbcAuthorizationCodeServices(this.dataSource));
-        }
-
-        @Bean
-        @Autowired
-        public ApprovalStoreUserApprovalHandler approvalStoreUserApprovalHandler(
-            @Value("${oauthServer.approvalExpirySeconds}") Integer approvalExpirySeconds,
-            ApprovalStore approvalStore,
-            ClientDetailsService clientDetailsService) {
-            final ApprovalStoreUserApprovalHandler userApprovalHandler = new ApprovalStoreUserApprovalHandler();
-            userApprovalHandler.setApprovalExpiryInSeconds(approvalExpirySeconds);
-            userApprovalHandler.setApprovalStore(approvalStore);
-            userApprovalHandler.setClientDetailsService(clientDetailsService);
-
-            DefaultOAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
-            userApprovalHandler.setRequestFactory(requestFactory);
-            return userApprovalHandler;
-        }
-
-        @Bean
-        public ApprovalStore approvalStore() {
-            return new JdbcApprovalStore(dataSource);
-        }
-
-        private DefaultTokenServices tokenServices() {
-            final DefaultTokenServices tokenServices = new DefaultTokenServices();
-            tokenServices.setSupportRefreshToken(true);
-            tokenServices.setTokenStore(tokenStore());
-            tokenServices.setClientDetailsService(clientDetailsService);
-            tokenServices.setAccessTokenValiditySeconds(accessTokenValiditySeconds);
-            tokenServices.setRefreshTokenValiditySeconds(refreshTokenValiditySeconds);
-            return tokenServices;
-        }
-
-        @Bean
-        public ConcurrentJdbcTokenStore tokenStore() {
-            return new ConcurrentJdbcTokenStore(dataSource);
-        }
-
-        @Override
-        public void configure(AuthorizationServerSecurityConfigurer oauthServer) {
-            oauthServer
-                .checkTokenAccess("hasAuthority('" + ROLE_TOKEN_CHECKER + "')")
-                .passwordEncoder(passwordEncoder());
-        }
-
-        @Bean
-        public BCryptPasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
-
-        @Override
-        public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
-            configurer.jdbc(dataSource);
-        }
+    @Override
+    public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
+      configurer.jdbc(dataSource);
     }
+  }
 
 
 }

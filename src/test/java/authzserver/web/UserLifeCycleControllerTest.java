@@ -1,17 +1,12 @@
 package authzserver.web;
 
 import authzserver.AbstractIntegrationTest;
-import authzserver.model.Attribute;
 import authzserver.model.LifeCycleResult;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.Assert.assertEquals;
 
@@ -47,6 +42,18 @@ public class UserLifeCycleControllerTest extends AbstractIntegrationTest {
     assertEquals(0, result.getData().size());
   }
 
+  @Test
+  public void unsupportedContentNegotion() {
+    LifeCycleResult result = given()
+      .auth()
+      .preemptive()
+      .basic("user", "secret")
+      .when()
+      .delete("deprovision/nope.me")
+      .as(LifeCycleResult.class);
+    assertEquals(0, result.getData().size());
+  }
+
   private LifeCycleResult doDeprovision(boolean dryRun) {
     return given()
       .auth()
@@ -60,7 +67,7 @@ public class UserLifeCycleControllerTest extends AbstractIntegrationTest {
 
   private void assertLifeCycleResult(LifeCycleResult result) {
     Map<String, String> map = result.getData().stream().collect(toMap(attr -> attr.getName(), attr -> attr.getValue()));
-    assertEquals(7 ,map.size());
+    assertEquals(7, map.size());
     assertEquals(map.get("approval"), "test_client_read_APPROVED");
     assertEquals(map.get("authenticating_authority"), "my-university");
     assertEquals(map.get("edu_person_principal_name"), "admin@example.com");
